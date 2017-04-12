@@ -1,0 +1,367 @@
+swagger: '2.0'
+info:
+  version: '0.1'
+  title: bulb
+  description: growth
+host: 'localhost:80'
+basePath: /api
+schemes:
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+  '/organizations/{id}':
+    parameters:
+      - name: id
+        in: path
+        required: true
+        type: string
+    get:
+      operationId: GET-organization
+      summary: Get Organization
+      tags:
+        - Organizations
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/organization-output'
+    put:
+      operationId: PUT-organization
+      summary: Update Organization
+      tags:
+        - Organizations
+      parameters:
+        - name: body
+          in: body
+          schema:
+            $ref: '#/definitions/organization-input'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/organization-output'
+    delete:
+      operationId: DELETE-organization
+      summary: Delete Organization
+      tags:
+        - Organizations
+      responses:
+        '204':
+          description: ''
+  /organizations:
+    get:
+      operationId: LIST-organizations
+      summary: List Organizations
+      tags:
+        - Organizations
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/organization-output'
+    post:
+      operationId: POST-organization
+      summary: Create Organization
+      tags:
+        - Organizations
+      parameters:
+        - name: body
+          in: body
+          schema:
+            $ref: '#/definitions/organization-input'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/organization-output'
+  '/documents/{id}':
+    parameters:
+      - name: id
+        in: path
+        required: true
+        type: string
+    get:
+      operationId: GET-document
+      summary: Get Document
+      tags:
+        - Documents
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/document-output'
+    put:
+      operationId: PUT-document
+      summary: Update Document
+      tags:
+        - Documents
+      parameters:
+        - name: body
+          in: body
+          schema:
+            $ref: '#/definitions/document-input'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/document-output'
+    delete:
+      operationId: DELETE-document
+      summary: Delete Document
+      tags:
+        - Documents
+      responses:
+        '204':
+          description: ''
+  /documents:
+    get:
+      operationId: LIST-documents
+      summary: List Documents
+      tags:
+        - Documents
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/document-output'
+    post:
+      operationId: POST-document
+      summary: Create Document
+      tags:
+        - Documents
+      parameters:
+        - name: body
+          in: body
+          schema:
+            $ref: '#/definitions/document-input'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/document-output'
+  '/users/{id}':
+    parameters:
+      - name: id
+        in: path
+        required: true
+        type: string
+    get:
+      operationId: GET-user
+      summary: Get User
+      tags:
+        - Users
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/user-output'
+    put:
+      operationId: PUT-user
+      summary: Update User
+      tags:
+        - Users
+      parameters:
+        - name: body
+          in: body
+          schema:
+            $ref: '#/definitions/user-input'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/user-output'
+    delete:
+      operationId: DELETE-user
+      summary: Delete User
+      tags:
+        - Users
+      responses:
+        '204':
+          description: ''
+  /users:
+    get:
+      operationId: LIST-users
+      summary: List Users
+      tags:
+        - Users
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/user-output'
+    post:
+      operationId: POST-user
+      summary: Create User
+      tags:
+        - Users
+      parameters:
+        - name: body
+          in: body
+          schema:
+            $ref: '#/definitions/user-input'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/user-output'
+definitions:
+  document:
+    title: document
+    type: object
+    properties:
+      id:
+        type: string
+        format: uuid
+      organization:
+        type: string
+        format: uuid
+      uri:
+        type: string
+        format: uri
+      dueDate:
+        type: string
+        format: date-time
+      progress:
+        type: number
+        default: 0
+        minimum: 0
+        maximum: 1
+      status:
+        type: string
+        enum:
+          - NOT_STARTED
+          - IN_PROGRESS
+          - DONE
+        default: NOT_STARTED
+      name:
+        type: string
+        pattern: '^[A-Za-z0-9_ -]+'
+    required:
+      - id
+      - organization
+      - uri
+      - status
+      - name
+  document-params:
+    title: document-params
+    type: object
+    properties:
+      id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        pattern: '^[A-Za-z0-9_ -]+'
+      organization:
+        type: string
+        format: uuid
+      uri:
+        type: string
+        format: uri
+    required:
+      - id
+  organization:
+    title: organization
+    type: object
+    properties:
+      id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        pattern: '[a-zA-Z0-9-_ ]+'
+      users:
+        type: array
+        description: users who are member of an organization by id
+        items:
+          type: string
+          format: uuid
+    required:
+      - id
+      - name
+      - users
+  organization-params:
+    title: organization-params
+    type: object
+    properties:
+      id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        pattern: '^[a-zA-Z0-9-_ ]+'
+    required:
+      - id
+  user:
+    title: user
+    type: object
+    properties:
+      id:
+        type: string
+        format: uuid
+      email:
+        type: string
+        format: email
+      organizations:
+        type: array
+        description: a list of organizations (by id) that the user is a member of.
+        uniqueItems: true
+        items:
+          type: string
+          format: uuid
+      name:
+        type: string
+        pattern: '^[A-Za-z-_ ]+'
+    required:
+      - id
+      - email
+      - organizations
+      - name
+  user-params:
+    title: user-params
+    type: object
+    properties:
+      id:
+        type: string
+        format: uuid
+      email:
+        type: string
+        format: email
+      name:
+        type: string
+        pattern: '^[A-Za-z0-9_ -]+'
+    required:
+      - id
+  user-input:
+    title: User Input
+    $ref: '#/definitions/user-params'
+  user-output:
+    title: User Output
+    allOf:
+      - $ref: '#/definitions/user'
+      - $ref: '#/definitions/user-input'
+  organization-input:
+    title: Organization Input
+    $ref: '#/definitions/organization-params'
+  organization-output:
+    title: Organization Output
+    allOf:
+      - $ref: '#/definitions/organization'
+      - $ref: '#/definitions/organization-input'
+  document-input:
+    title: Document Input
+    $ref: '#/definitions/document-params'
+  document-output:
+    title: Document Output
+    allOf:
+      - $ref: '#/definitions/document'
+      - $ref: '#/definitions/document-input'
