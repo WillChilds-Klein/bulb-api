@@ -19,7 +19,7 @@ paths:
         required: true
         type: string
     get:
-      operationId: GET-organization
+      operationId: app.get_organization
       summary: Get Organization
       tags:
         - Organizations
@@ -29,7 +29,7 @@ paths:
           schema:
             $ref: '#/definitions/organization-output'
     put:
-      operationId: PUT-organization
+      operationId: app.update_organization
       summary: Update Organization
       tags:
         - Organizations
@@ -44,7 +44,7 @@ paths:
           schema:
             $ref: '#/definitions/organization-output'
     delete:
-      operationId: DELETE-organization
+      operationId: app.delete_organization
       summary: Delete Organization
       tags:
         - Organizations
@@ -53,7 +53,7 @@ paths:
           description: ''
   /organizations:
     get:
-      operationId: LIST-organizations
+      operationId: app.list_organizations
       summary: List Organizations
       tags:
         - Organizations
@@ -65,7 +65,7 @@ paths:
             items:
               $ref: '#/definitions/organization-output'
     post:
-      operationId: POST-organization
+      operationId: app.create_organization
       summary: Create Organization
       tags:
         - Organizations
@@ -86,7 +86,7 @@ paths:
         required: true
         type: string
     get:
-      operationId: GET-document
+      operationId: app.get_document
       summary: Get Document
       tags:
         - Documents
@@ -96,7 +96,7 @@ paths:
           schema:
             $ref: '#/definitions/document-output'
     put:
-      operationId: PUT-document
+      operationId: app.update_document
       summary: Update Document
       tags:
         - Documents
@@ -111,7 +111,7 @@ paths:
           schema:
             $ref: '#/definitions/document-output'
     delete:
-      operationId: DELETE-document
+      operationId: app.delete_document
       summary: Delete Document
       tags:
         - Documents
@@ -120,7 +120,7 @@ paths:
           description: ''
   /documents:
     get:
-      operationId: LIST-documents
+      operationId: app.list_documents
       summary: List Documents
       tags:
         - Documents
@@ -132,7 +132,7 @@ paths:
             items:
               $ref: '#/definitions/document-output'
     post:
-      operationId: POST-document
+      operationId: app.create_document
       summary: Create Document
       tags:
         - Documents
@@ -153,7 +153,7 @@ paths:
         required: true
         type: string
     get:
-      operationId: GET-user
+      operationId: app.get_user
       summary: Get User
       tags:
         - Users
@@ -163,7 +163,7 @@ paths:
           schema:
             $ref: '#/definitions/user-output'
     put:
-      operationId: PUT-user
+      operationId: app.update_user
       summary: Update User
       tags:
         - Users
@@ -178,7 +178,7 @@ paths:
           schema:
             $ref: '#/definitions/user-output'
     delete:
-      operationId: DELETE-user
+      operationId: app.delete_user
       summary: Delete User
       tags:
         - Users
@@ -187,7 +187,7 @@ paths:
           description: ''
   /users:
     get:
-      operationId: LIST-users
+      operationId: app.list_users
       summary: List Users
       tags:
         - Users
@@ -199,7 +199,7 @@ paths:
             items:
               $ref: '#/definitions/user-output'
     post:
-      operationId: POST-user
+      operationId: app.create_user
       summary: Create User
       tags:
         - Users
@@ -227,7 +227,7 @@ definitions:
       uri:
         type: string
         format: uri
-      dueDate:
+      due_date:
         type: string
         format: date-time
       progress:
