@@ -3,8 +3,6 @@ info:
   version: '0.1'
   title: bulb
   description: growth
-host: 'localhost:80'
-basePath: /api
 schemes:
   - https
 consumes:
