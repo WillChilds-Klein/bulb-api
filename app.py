@@ -112,7 +112,8 @@ def create_user(body):
 
 
 connexion_app = connexion.App(__name__)
-connexion_app.add_api('spec/swagger.yaml', strict_validation=True)
+connexion_app.add_api('spec/swagger.yaml', strict_validation=True,
+                                           validate_responses=True)
 
 app = connexion_app.app
 
