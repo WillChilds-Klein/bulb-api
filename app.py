@@ -10,8 +10,6 @@ user_db = {}
 
 def get_organization(id):
     org_id = id
-    print org_id, type(org_id)
-    print [type(key) for key in org_db.keys()]
     if org_id in org_db:
         return org_db[id], 200
     return NoContent, 404
@@ -78,8 +76,6 @@ def create_document(body):
 
 def get_user(id):
     user_id = id
-    print user_id, type(user_id)
-    print [type(key) for key in user_db.keys()]
     if user_id in user_db:
         return user_db[id], 200
     return NoContent, 404
@@ -111,11 +107,42 @@ def create_user(body):
     return 'Success!', 200
 
 
+def get_resource(id):
+    resource_id = id
+    if resource_id in resource_db:
+        return resource_db[id], 200
+    return NoContent, 404
+
+
+def update_resource(body, id):
+    resource_id = body['id']
+    if resource_id in resource_db:
+        resource_db[resource_id] = body
+        return NoContent, 200
+    return NoContent, 404
+
+
+def delete_resource(id):
+    resource_id = id
+    if resource_id in resource_db:
+        del resource_db[resource_id]
+        return NoContent, 200
+    return NoContent, 404
+
+
+def list_resources():
+    return resource_db.values()
+
+
+def create_resource(body):
+    resource_id = body['id']
+    resource_db[resource_id] = body
+    return 'Success!', 200
+
+
 connexion_app = connexion.App(__name__)
 connexion_app.add_api('spec/swagger.yaml', strict_validation=True,
                                            validate_responses=True)
-
-app = connexion_app.app
 
 if __name__ == '__main__':
     connexion_app.run(port=8080, host='0.0.0.0')

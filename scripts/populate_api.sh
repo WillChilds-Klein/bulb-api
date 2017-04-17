@@ -6,20 +6,24 @@ which http || pip install http
 
 base_url=${1:-"http://localhost:8080"}
 
+do_post() {
+    local endpoint="$1"
+    local json="$2"
+    echo $json | \
+        http POST "$base_url/$(basename $endpoint)"
+}
+
 # populate users
-echo '{"id": "1", "name": "harold", "email": "harry@balls.com", "organizations": ["1"]}' | \
-    http POST $base_url/users
-echo '{"id": "2", "name": "gino", "email": "gino@greasypizza.com", "organizations": ["2"]}' | \
-    http POST $base_url/users
-echo '{"id": "3", "name": "gina", "email": "gina@greasypizza.com", "organizations": ["2"]}' | \
-    http POST $base_url/users
+do_post /users '{"id": "1", "name": "harold", "email": "harry@balls.com", "organizations": ["1"]}'
+do_post /users '{"id": "2", "name": "gino", "email": "gino@greasypizza.com", "organizations": ["2"]}'
+do_post /users '{"id": "3", "name": "gina", "email": "gina@greasypizza.com", "organizations": ["2"]}'
 
 # populate organizations
-echo '{"id": "1", "name": "mass chicken", "users": [1]}' \
-    | http POST $base_url/organizations
-echo '{"id": "2", "name": "ginos pizza", "users": [2,3]}' \
-    | http POST $base_url/organizations
+do_post /organizations '{"id": "1", "name": "mass chicken", "users": ["1"]}'
+do_post /organizations '{"id": "2", "name": "ginos pizza", "users": ["2","3"]}'
 
 # populate documents
-echo '{"id": "1", "name": "taxes", "organization": "1"}' \
-    | http POST $base_url/documents
+do_post /documents '{"id": "1", "name": "taxes", "organization": "1"}'
+do_post /documents '{"id": "1", "name": "taxes", "organization": "1"}'
+
+# populate resources
