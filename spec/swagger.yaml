@@ -3,7 +3,7 @@ info:
   version: '0.1'
   title: bulb
   description: growth
-host: rq3gqyq62j.execute-api.us-east-1.amazonaws.com
+host: dev.buttaface.space
 schemes:
   - https
 consumes:

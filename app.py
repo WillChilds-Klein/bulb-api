@@ -144,5 +144,7 @@ connexion_app = connexion.App(__name__)
 connexion_app.add_api('spec/swagger.yaml', strict_validation=True,
                                            validate_responses=True)
 
+app = connexion_app.app
+
 if __name__ == '__main__':
     connexion_app.run(port=8080, host='0.0.0.0')
