@@ -14,16 +14,16 @@ do_post() {
 }
 
 # populate users
-do_post /users '{"id": "1", "name": "harold", "email": "harry@balls.com", "organizations": ["1"]}'
-do_post /users '{"id": "2", "name": "gino", "email": "gino@greasypizza.com", "organizations": ["2"]}'
-do_post /users '{"id": "3", "name": "gina", "email": "gina@greasypizza.com", "organizations": ["2"]}'
+do_post /users '{"name": "harold", "email": "harry@balls.com", "organizations": ["1"]}'
+do_post /users '{"name": "gino", "email": "gino@greasypizza.com", "organizations": ["2"]}'
+do_post /users '{"name": "gina", "email": "gina@greasypizza.com", "organizations": ["2"]}'
 
 # populate organizations
-do_post /organizations '{"id": "1", "name": "mass chicken", "users": ["1"]}'
-do_post /organizations '{"id": "2", "name": "ginos pizza", "users": ["2","3"]}'
+do_post /organizations '{"name": "mass chicken", "users": ["1"]}'
+do_post /organizations '{"name": "ginos pizza", "users": ["2","3"]}'
 
 # populate documents
-do_post /documents '{"id": "1", "name": "taxes", "organization": "1"}'
-do_post /documents '{"id": "1", "name": "taxes", "organization": "1"}'
+do_post /documents '{"name": "taxes", "organization": "1"}'
+do_post /documents '{"name": "taxes", "organization": "1"}'
 
 # populate resources

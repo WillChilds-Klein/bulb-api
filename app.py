@@ -1,30 +1,31 @@
 import connexion
 
 from connexion import NoContent
+from datetime import datetime
+from uuid import uuid4
 
 
 org_db = {}
 doc_db = {}
 user_db = {}
 
+DATETIME_FMT = '%Y-%m-%dT%H:%M:%SZ'
 
-def get_organization(id):
-    org_id = id
+
+def get_organization(org_id):
     if org_id in org_db:
-        return org_db[id], 200
+        return org_db[org_id], 200
     return NoContent, 404
 
 
-def update_organization(body, id):
-    org_id = body['id']
+def update_organization(body, org_id):
     if org_id in org_db:
-        org_db[org_id] = body
-        return NoContent, 200
+        org_db[org_id].update(body)
+        return org_db[org_id], 200
     return NoContent, 404
 
 
-def delete_organization(id):
-    org_id = id
+def delete_organization(org_id):
     if org_id in org_db:
         del org_db[org_id]
         return NoContent, 200
@@ -36,28 +37,27 @@ def list_organizations():
 
 
 def create_organization(body):
-    org_id = body['id']
+    org_id = str(uuid4())
+    body['org_id'] = org_id
+    body['create_datetime'] = datetime.utcnow().strftime(DATETIME_FMT)
     org_db[org_id] = body
-    return 'Success!', 200
+    return org_db[org_id], 200
 
 
-def get_document(id):
-    doc_id = id
+def get_document(doc_id):
     if doc_id in doc_db:
-        return doc_db[id], 200
+        return doc_db[doc_id], 200
     return NoContent, 404
 
 
-def update_document(body, id):
-    doc_id = body['id']
+def update_document(body, doc_id):
     if doc_id in doc_db:
-        doc_db[doc_id] = body
-        return NoContent, 200
+        doc_db[doc_id].update(body)
+        return doc_db[doc_id], 200
     return NoContent, 404
 
 
-def delete_document(id):
-    doc_id = id
+def delete_document(doc_id):
     if doc_id in doc_db:
         del doc_db[doc_id]
         return NoContent, 200
@@ -69,28 +69,27 @@ def list_documents():
 
 
 def create_document(body):
-    doc_id = body['id']
+    doc_id = str(uuid4())
+    body['doc_id'] = doc_id
+    body['create_datetime'] = datetime.utcnow().strftime(DATETIME_FMT)
     doc_db[doc_id] = body
-    return 'Success!', 200
+    return doc_db[doc_id], 200
 
 
-def get_user(id):
-    user_id = id
+def get_user(user_id):
     if user_id in user_db:
-        return user_db[id], 200
+        return user_db[user_id], 200
     return NoContent, 404
 
 
-def update_user(body, id):
-    user_id = body['id']
+def update_user(body, user_id):
     if user_id in user_db:
-        user_db[user_id] = body
-        return NoContent, 200
+        user_db[user_id].update(body)
+        return user_db[user_id], 200
     return NoContent, 404
 
 
-def delete_user(id):
-    user_id = id
+def delete_user(user_id):
     if user_id in user_db:
         del user_db[user_id]
         return NoContent, 200
@@ -102,30 +101,29 @@ def list_users():
 
 
 def create_user(body):
-    user_id = body['id']
+    user_id = str(uuid4())
+    body['user_id'] = user_id
+    body['create_datetime'] = datetime.utcnow().strftime(DATETIME_FMT)
     user_db[user_id] = body
-    return 'Success!', 200
+    return user_db[user_id], 200
 
 
-def get_resource(id):
-    resource_id = id
-    if resource_id in resource_db:
-        return resource_db[id], 200
+def get_resource(res_id):
+    if res_id in resource_db:
+        return resource_db[res_id], 200
     return NoContent, 404
 
 
-def update_resource(body, id):
-    resource_id = body['id']
-    if resource_id in resource_db:
-        resource_db[resource_id] = body
-        return NoContent, 200
+def update_resource(body, res_id):
+    if res_id in resource_db:
+        resource_db[res_id].update(body)
+        return resource_db[res_id], 200
     return NoContent, 404
 
 
-def delete_resource(id):
-    resource_id = id
-    if resource_id in resource_db:
-        del resource_db[resource_id]
+def delete_resource(res_id):
+    if res_id in resource_db:
+        del resource_db[res_id]
         return NoContent, 200
     return NoContent, 404
 
@@ -135,9 +133,11 @@ def list_resources():
 
 
 def create_resource(body):
-    resource_id = body['id']
-    resource_db[resource_id] = body
-    return 'Success!', 200
+    res_id = str(uuid4())
+    body['res_id'] = res_id
+    body['create_datetime'] = datetime.utcnow().strftime(DATETIME_FMT)
+    resource_db[res_id] = body
+    return resource_db[res_id], 200
 
 
 connexion_app = connexion.App(__name__)

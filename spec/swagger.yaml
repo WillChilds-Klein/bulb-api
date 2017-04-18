@@ -11,9 +11,9 @@ consumes:
 produces:
   - application/json
 paths:
-  '/documents/{id}':
+  '/documents/{doc_id}':
     parameters:
-      - name: id
+      - name: doc_id
         in: path
         required: true
         type: string
@@ -103,9 +103,9 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/document-output'
-  '/organizations/{id}':
+  '/organizations/{org_id}':
     parameters:
-      - name: id
+      - name: org_id
         in: path
         required: true
         type: string
@@ -191,9 +191,9 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/organization-output'
-  '/resources/{id}':
+  '/resources/{resource_id}':
     parameters:
-      - name: id
+      - name: resource_id
         in: path
         required: true
         type: string
@@ -279,9 +279,9 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/resource-output'
-  '/users/{id}':
+  '/users/{user_id}':
     parameters:
-      - name: id
+      - name: user_id
         in: path
         required: true
         type: string
@@ -455,7 +455,7 @@ definitions:
     title: Document ReadOnly
     type: object
     properties:
-      id:
+      doc_id:
         type: string
         format: uuid
         description: UUID for the document. This value is guaranteed to be unique amongst documents
@@ -464,7 +464,7 @@ definitions:
         format: date-time
         description: datetime string representing document creation time.
     required:
-      - id
+      - doc_id
     example:
       id: 246bfd6d-2aed-47d7-8fde-cb05aabfcd4f
       create_datetime: '2017-04-16T13:49:13Z'
@@ -517,7 +517,7 @@ definitions:
     title: Organization ReadOnly
     type: object
     properties:
-      id:
+      org_id:
         type: string
         format: uuid
         description: UUID for the organization. This value is guaranteed to be unique amongst organizations.
@@ -526,7 +526,7 @@ definitions:
         format: date-time
         description: datetime string representing organization creation datetime.
     required:
-      - id
+      - org_id
     example:
       id: 246bfd6d-2aed-47d7-8fde-cb05aabfcd4f
       create_datetime: '2017-04-16T13:49:13Z'
@@ -571,7 +571,7 @@ definitions:
     title: Resource ReadOnly
     type: object
     properties:
-      id:
+      res_id:
         type: string
         format: uuid
         description: UUID for the resource. This value is guaranteed to be unique amongst resources.
@@ -580,7 +580,7 @@ definitions:
         format: date-time
         description: datetime string representing resource creation datetime.
     required:
-      - id
+      - res_id
     example:
       id: 246bfd6d-2aed-47d7-8fde-cb05aabfcd4f
       create_datetime: '2017-04-16T13:49:13Z'
@@ -610,7 +610,7 @@ definitions:
     title: User ReadOnly
     type: object
     properties:
-      id:
+      user_id:
         type: string
         format: uuid
         description: UUID for the user. This value is guaranteed to be unique amongst users.
@@ -619,7 +619,7 @@ definitions:
         format: date-time
         description: datetime string representing user creation datetime.
     required:
-      - id
+      - user_id
     example:
       id: 246bfd6d-2aed-47d7-8fde-cb05aabfcd4f
       create_datetime: '2017-04-16T13:49:13Z'
