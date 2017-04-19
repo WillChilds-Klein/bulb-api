@@ -1,5 +1,3 @@
-import connexion
-
 from connexion import NoContent
 from datetime import datetime
 from uuid import uuid4
@@ -34,7 +32,7 @@ def delete_organization(org_id):
 
 
 def list_organizations():
-    return org_db.values()
+    return org_db.values(), 200
 
 
 def create_organization(body):
@@ -66,7 +64,7 @@ def delete_document(doc_id):
 
 
 def list_documents():
-    return doc_db.values()
+    return doc_db.values(), 200
 
 
 def create_document(body):
@@ -98,7 +96,7 @@ def delete_user(user_id):
 
 
 def list_users():
-    return user_db.values()
+    return user_db.values(), 200
 
 
 def create_user(body):
@@ -130,7 +128,7 @@ def delete_resource(res_id):
 
 
 def list_resources():
-    return res_db.values()
+    return res_db.values(), 200
 
 
 def create_resource(body):
@@ -139,13 +137,3 @@ def create_resource(body):
     body['create_datetime'] = datetime.utcnow().strftime(DATETIME_FMT)
     res_db[res_id] = body
     return res_db[res_id], 200
-
-
-connexion_app = connexion.App(__name__)
-connexion_app.add_api('spec/swagger.yaml', strict_validation=True,
-                                           validate_responses=True)
-
-app = connexion_app.app
-
-if __name__ == '__main__':
-    connexion_app.run(port=8080, host='0.0.0.0')

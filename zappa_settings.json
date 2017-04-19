@@ -1,6 +1,6 @@
 {
     "dev": {
-        "app_function": "app.app",
+        "app_function": "api.app",
         "s3_bucket": "zappa-w6m21iqjw",
         "domain": "dev.buttaface.space",
         "lets_encrypt_key": "s3://zappa-util/lets_encrypt.key",

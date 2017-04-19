@@ -18,7 +18,7 @@ paths:
         required: true
         type: string
     get:
-      operationId: app.get_document
+      operationId: api.handlers.get_document
       summary: Get Document
       tags:
         - Documents
@@ -39,7 +39,7 @@ paths:
               name: state tax filing
               type: FORM
     put:
-      operationId: app.update_document
+      operationId: api.handlers.update_document
       summary: Update Document
       tags:
         - Documents
@@ -54,7 +54,7 @@ paths:
           schema:
             $ref: '#/definitions/document-output'
     delete:
-      operationId: app.delete_document
+      operationId: api.handlers.delete_document
       summary: Delete Document
       tags:
         - Documents
@@ -63,7 +63,7 @@ paths:
           description: ''
   /documents:
     get:
-      operationId: app.list_documents
+      operationId: api.handlers.list_documents
       summary: List Documents
       tags:
         - Documents
@@ -89,7 +89,7 @@ paths:
                 name: state tax filing
                 type: FORM
     post:
-      operationId: app.create_document
+      operationId: api.handlers.create_document
       summary: Create Document
       tags:
         - Documents
@@ -110,7 +110,7 @@ paths:
         required: true
         type: string
     get:
-      operationId: app.get_organization
+      operationId: api.handlers.get_organization
       summary: Get Organization
       tags:
         - Organizations
@@ -129,7 +129,7 @@ paths:
                 - af125212-7e30-47be-b932-9baf821a615f
                 - af93193a-9e57-4430-8c4e-623d9c4549d1
     put:
-      operationId: app.update_organization
+      operationId: api.handlers.update_organization
       summary: Update Organization
       tags:
         - Organizations
@@ -144,7 +144,7 @@ paths:
           schema:
             $ref: '#/definitions/organization-output'
     delete:
-      operationId: app.delete_organization
+      operationId: api.handlers.delete_organization
       summary: Delete Organization
       tags:
         - Organizations
@@ -153,7 +153,7 @@ paths:
           description: ''
   /organizations:
     get:
-      operationId: app.list_organizations
+      operationId: api.handlers.list_organizations
       summary: List Organizations
       tags:
         - Organizations
@@ -177,7 +177,7 @@ paths:
                   - af125212-7e30-47be-b932-9baf821a615f
                   - af93193a-9e57-4430-8c4e-623d9c4549d1
     post:
-      operationId: app.create_organization
+      operationId: api.handlers.create_organization
       summary: Create Organization
       tags:
         - Organizations
@@ -198,7 +198,7 @@ paths:
         required: true
         type: string
     get:
-      operationId: app.get_resource
+      operationId: api.handlers.get_resource
       summary: Get Resource
       tags:
         - Resources
@@ -217,7 +217,7 @@ paths:
               type: FORM
               uri: 'https://bulb-resources.s3.amazonaws.com/c166bf45-0421-4df1-9fb6-b5cf091ae57d'
     put:
-      operationId: app.update_resource
+      operationId: api.handlers.update_resource
       summary: Update Resource
       tags:
         - Resources
@@ -232,7 +232,7 @@ paths:
           schema:
             $ref: '#/definitions/resource-output'
     delete:
-      operationId: app.delete_resource
+      operationId: api.handlers.delete_resource
       summary: Delete Resource
       tags:
         - Resources
@@ -241,7 +241,7 @@ paths:
           description: ''
   /resources:
     get:
-      operationId: app.list_resources
+      operationId: api.handlers.list_resources
       summary: List Resources
       tags:
         - Resources
@@ -265,7 +265,7 @@ paths:
                 type: FORM
                 uri: 'https://bulb-resources.s3.amazonaws.com/c166bf45-0421-4df1-9fb6-b5cf091ae57d'
     post:
-      operationId: app.create_resource
+      operationId: api.handlers.create_resource
       summary: Create Resource
       tags:
         - Resources
@@ -286,7 +286,7 @@ paths:
         required: true
         type: string
     get:
-      operationId: app.get_user
+      operationId: api.handlers.get_user
       summary: Get User
       tags:
         - Users
@@ -304,7 +304,7 @@ paths:
                 - c0d803db-8ab2-429c-bfa1-b17afdd18b5d
               name: bob
     put:
-      operationId: app.update_user
+      operationId: api.handlers.update_user
       summary: Update User
       tags:
         - Users
@@ -319,7 +319,7 @@ paths:
           schema:
             $ref: '#/definitions/user-output'
     delete:
-      operationId: app.delete_user
+      operationId: api.handlers.delete_user
       summary: Delete User
       tags:
         - Users
@@ -328,7 +328,7 @@ paths:
           description: ''
   /users:
     get:
-      operationId: app.list_users
+      operationId: api.handlers.list_users
       summary: List Users
       tags:
         - Users
@@ -351,7 +351,7 @@ paths:
                   - c0d803db-8ab2-429c-bfa1-b17afdd18b5d
                 name: bob
     post:
-      operationId: app.create_user
+      operationId: api.handlers.create_user
       summary: Create User
       tags:
         - Users
