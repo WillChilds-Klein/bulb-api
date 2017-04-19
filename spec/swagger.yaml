@@ -191,9 +191,9 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/organization-output'
-  '/resources/{resource_id}':
+  '/resources/{res_id}':
     parameters:
-      - name: resource_id
+      - name: res_id
         in: path
         required: true
         type: string

@@ -27,3 +27,7 @@ do_post /documents '{"name": "taxes", "organization": "1"}'
 do_post /documents '{"name": "taxes", "organization": "1"}'
 
 # populate resources
+do_post /resources '{"name": "CA Employee Registration", "processing_time": 60, "status": "NOT_STARTED", 
+                     "type": "FORM", "uri": "https://bulb-resources.s3.amazonaws.com/c166bf45-0421-4df1-9fb6-b5cf091ae57d"}'
+do_post /resources '{"name": "CA Liquor License Guide", "processing_time": 15, "status": "IN_PROGRESS",
+                     "type": "GUIDE", "uri": "https://bulb-resources.s3.amazonaws.com/c166bf45-0421-4df1-9fb6-b5cf091ae57d"}'

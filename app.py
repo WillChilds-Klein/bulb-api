@@ -8,6 +8,7 @@ from uuid import uuid4
 org_db = {}
 doc_db = {}
 user_db = {}
+res_db = {}
 
 DATETIME_FMT = '%Y-%m-%dT%H:%M:%SZ'
 
@@ -109,35 +110,35 @@ def create_user(body):
 
 
 def get_resource(res_id):
-    if res_id in resource_db:
-        return resource_db[res_id], 200
+    if res_id in res_db:
+        return res_db[res_id], 200
     return NoContent, 404
 
 
 def update_resource(body, res_id):
-    if res_id in resource_db:
-        resource_db[res_id].update(body)
-        return resource_db[res_id], 200
+    if res_id in res_db:
+        res_db[res_id].update(body)
+        return res_db[res_id], 200
     return NoContent, 404
 
 
 def delete_resource(res_id):
-    if res_id in resource_db:
-        del resource_db[res_id]
+    if res_id in res_db:
+        del res_db[res_id]
         return NoContent, 200
     return NoContent, 404
 
 
 def list_resources():
-    return resource_db.values()
+    return res_db.values()
 
 
 def create_resource(body):
     res_id = str(uuid4())
     body['res_id'] = res_id
     body['create_datetime'] = datetime.utcnow().strftime(DATETIME_FMT)
-    resource_db[res_id] = body
-    return resource_db[res_id], 200
+    res_db[res_id] = body
+    return res_db[res_id], 200
 
 
 connexion_app = connexion.App(__name__)
