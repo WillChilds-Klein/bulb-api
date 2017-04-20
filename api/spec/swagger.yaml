@@ -537,30 +537,16 @@ definitions:
       name:
         type: string
         pattern: '^[A-Za-z0-9_ -]+'
-      processing_time:
-        type: integer
-        minimum: 0
-        exclusiveMinimum: false
-        description: Excpected number of days that local governmental organization requires for processing the Resource.
-      status:
-        type: string
-        enum:
-          - NOT_STARTED
-          - IN_PROGRESS
-          - DONE
-          - NOT_APPLICABLE
-        description: 'TODO: deduplicate this enum with Document.status'
-      type:
-        type: string
-        enum:
-          - TEMPLATE
-          - GUIDE
-          - FORM
-        description: 'TODO: deduplicate this enum with Document.type'
-      uri:
+      url:
         type: string
         format: uri
         description: 'TODO: deduplicate this property with Document.uri'
+      email_to_uri:
+        type: string
+        pattern: '^mailto:.+\@.+\..+$'
+      s3_thumbnail_uri:
+        type: string
+        format: uri
     example:
       name: MD State Income Tax Filing 2017
       processing_time: 30
