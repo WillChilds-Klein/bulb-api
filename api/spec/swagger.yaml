@@ -403,6 +403,7 @@ definitions:
   document:
     title: Document
     type: object
+    additionalProperties: false
     properties:
       organization:
         type: string
@@ -449,8 +450,9 @@ definitions:
       due_date: '2017-04-26T22:21:23Z'
       progress: 0.33
       status: DONE
-      name: state tax filing
+      name: state tax filing 2017
       type: FORM
+      note: this is our master document for tax season '17. pilfering washington politicians...
   document-readonly:
     title: Document ReadOnly
     type: object
@@ -490,6 +492,7 @@ definitions:
   organization:
     title: Organization
     type: object
+    additionalProperties: false
     properties:
       type:
         type: string
@@ -533,6 +536,7 @@ definitions:
   resource:
     title: Resource
     type: object
+    additionalProperties: false
     properties:
       name:
         type: string
@@ -541,18 +545,17 @@ definitions:
         type: string
         format: uri
         description: 'TODO: deduplicate this property with Document.uri'
-      email_to_uri:
+      mailto_uri:
         type: string
         pattern: '^mailto:.+\@.+\..+$'
       s3_thumbnail_uri:
         type: string
         format: uri
     example:
-      name: MD State Income Tax Filing 2017
-      processing_time: 30
-      status: IN_PROGRESS
-      type: FORM
-      uri: 'https://bulb-resources.s3.amazonaws.com/c166bf45-0421-4df1-9fb6-b5cf091ae57d'
+      name: Maryland Chamber of Commerce
+      url: 'https://www.mdchamber.org/'
+      s3_thumbnail_uri: 'https://bulb-resources.s3.amazonaws.com/MD_Chamber_of_Commerce.png'
+      mailto_uri: 'mailto:jpalmeri@mdchamber.org'
   resource-readonly:
     title: Resource ReadOnly
     type: object
@@ -573,6 +576,7 @@ definitions:
   user:
     title: User
     type: object
+    additionalProperties: false
     properties:
       email:
         type: string
