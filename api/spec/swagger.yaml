@@ -27,17 +27,6 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/document-output'
-          examples:
-            application/json:
-              id: f2ebd8dd-86be-41d9-8ee9-858a34ec21e2
-              create_datetime: '2775-01-21T18:55:35.400Z'
-              organization: 0e8eadfa-c8c6-4eae-a256-f9093b85662d
-              uri: 'https://bulb-documents.s3.amazonaws.com/410741ff-e2f1-4b42-a4de-84cd91129371'
-              due_date: '2017-04-26T22:21:23Z'
-              progress: 0.33
-              status: DONE
-              name: state tax filing
-              type: FORM
     put:
       operationId: api.handlers.update_document
       summary: Update Document
@@ -77,17 +66,6 @@ paths:
             type: array
             items:
               $ref: '#/definitions/document-output'
-          examples:
-            application/json:
-              - id: f2ebd8dd-86be-41d9-8ee9-858a34ec21e2
-                create_datetime: '2775-01-21T18:55:35.400Z'
-                organization: 0e8eadfa-c8c6-4eae-a256-f9093b85662d
-                uri: 'https://bulb-documents.s3.amazonaws.com/410741ff-e2f1-4b42-a4de-84cd91129371'
-                due_date: '2017-04-26T22:21:23Z'
-                progress: 0.33
-                status: DONE
-                name: state tax filing
-                type: FORM
     post:
       operationId: api.handlers.create_document
       summary: Create Document
@@ -119,15 +97,6 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/organization-output'
-          examples:
-            application/json:
-              id: ca32d93f-5af6-43d1-a5bd-da4f5152c9d0
-              type: BUYER
-              name: bob's burgers
-              users:
-                - b85769c0-5b80-4759-ae06-5881e8c85d77
-                - af125212-7e30-47be-b932-9baf821a615f
-                - af93193a-9e57-4430-8c4e-623d9c4549d1
     put:
       operationId: api.handlers.update_organization
       summary: Update Organization
@@ -167,15 +136,6 @@ paths:
             type: array
             items:
               $ref: '#/definitions/organization-output'
-          examples:
-            application/json:
-              - id: ca32d93f-5af6-43d1-a5bd-da4f5152c9d0
-                type: BUYER
-                name: bob's burgers
-                users:
-                  - b85769c0-5b80-4759-ae06-5881e8c85d77
-                  - af125212-7e30-47be-b932-9baf821a615f
-                  - af93193a-9e57-4430-8c4e-623d9c4549d1
     post:
       operationId: api.handlers.create_organization
       summary: Create Organization
@@ -207,15 +167,6 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/resource-output'
-          examples:
-            application/json:
-              id: 25fbb904-1b71-4564-b246-093c286be335
-              create_datetime: '2003-10-18T05:14:26.976Z'
-              name: MD State Income Tax Filing 2017
-              processing_time: 30
-              status: IN_PROGRESS
-              type: FORM
-              uri: 'https://bulb-resources.s3.amazonaws.com/c166bf45-0421-4df1-9fb6-b5cf091ae57d'
     put:
       operationId: api.handlers.update_resource
       summary: Update Resource
@@ -255,15 +206,6 @@ paths:
             type: array
             items:
               $ref: '#/definitions/resource-output'
-          examples:
-            application/json:
-              - id: 25fbb904-1b71-4564-b246-093c286be335
-                create_datetime: '2003-10-18T05:14:26.976Z'
-                name: MD State Income Tax Filing 2017
-                processing_time: 30
-                status: IN_PROGRESS
-                type: FORM
-                uri: 'https://bulb-resources.s3.amazonaws.com/c166bf45-0421-4df1-9fb6-b5cf091ae57d'
     post:
       operationId: api.handlers.create_resource
       summary: Create Resource
@@ -295,14 +237,6 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/user-output'
-          examples:
-            application/json:
-              id: 7a0ab3bb-a0f6-4a94-9f1f-dcc2210d8efe
-              create_datetime: '5042-03-13T05:13:35.233Z'
-              email: bob@bobsburgers.com
-              organizations:
-                - c0d803db-8ab2-429c-bfa1-b17afdd18b5d
-              name: bob
     put:
       operationId: api.handlers.update_user
       summary: Update User
@@ -342,14 +276,6 @@ paths:
             type: array
             items:
               $ref: '#/definitions/user-output'
-          examples:
-            application/json:
-              - id: 7a0ab3bb-a0f6-4a94-9f1f-dcc2210d8efe
-                create_datetime: '5042-03-13T05:13:35.233Z'
-                email: bob@bobsburgers.com
-                organizations:
-                  - c0d803db-8ab2-429c-bfa1-b17afdd18b5d
-                name: bob
     post:
       operationId: api.handlers.create_user
       summary: Create User
@@ -403,7 +329,16 @@ definitions:
   document:
     title: Document
     type: object
+    additionalProperties: false
     properties:
+      doc_id:
+        type: string
+        format: uuid
+        description: UUID for the document. This value is guaranteed to be unique amongst documents
+      create_datetime:
+        type: string
+        format: date-time
+        description: datetime string representing document creation time.
       organization:
         type: string
         format: uuid
@@ -444,6 +379,8 @@ definitions:
         maxLength: 140
         description: A short note to be attached to the document.
     example:
+      doc_id: 476b329e-feb6-4237-a3ca-7844b1d0b598
+      create_datetime: '2016-07-11T12:16:06Z'
       organization: 0e8eadfa-c8c6-4eae-a256-f9093b85662d
       uri: 'https://bulb-documents.s3.amazonaws.com/410741ff-e2f1-4b42-a4de-84cd91129371'
       due_date: '2017-04-26T22:21:23Z'
@@ -455,6 +392,7 @@ definitions:
   document-readonly:
     title: Document ReadOnly
     type: object
+    additionalProperties: false
     properties:
       doc_id:
         type: string
@@ -464,11 +402,56 @@ definitions:
         type: string
         format: date-time
         description: datetime string representing document creation time.
-    required:
-      - doc_id
+      organization:
+        type: string
+        format: uuid
+        description: UUID of Organization with which the Document is associated.
+      uri:
+        type: string
+        format: uri
+        description: URI where the actual Document is located.
+      due_date:
+        type: string
+        format: date-time
+        description: Datetime representing when the Document it due.
+      progress:
+        type: number
+        default: 0
+        minimum: 0
+        maximum: 1
+        description: 'Decimal numer on the interval [0,1] representing the progress towards completion of the Document as a percentage.'
+      status:
+        type: string
+        default: NOT_STARTED
+        enum:
+          - NOT_STARTED
+          - IN_PROGRESS
+          - DONE
+          - NOT_APPLICAPLE
+      name:
+        type: string
+        pattern: '^[A-Za-z0-9_ -]+'
+      type:
+        type: string
+        enum:
+          - GUIDE
+          - TEMPLATE
+          - FORM
+      note:
+        type: string
+        maxLength: 140
+        description: A short note to be attached to the document.
     example:
-      id: 246bfd6d-2aed-47d7-8fde-cb05aabfcd4f
-      create_datetime: '2017-04-16T13:49:13Z'
+      doc_id: 476b329e-feb6-4237-a3ca-7844b1d0b598
+      create_datetime: '2016-07-11T12:16:06Z'
+      organization: 0e8eadfa-c8c6-4eae-a256-f9093b85662d
+      uri: 'https://bulb-documents.s3.amazonaws.com/410741ff-e2f1-4b42-a4de-84cd91129371'
+      due_date: '2017-04-26T22:21:23Z'
+      progress: 0.33
+      status: DONE
+      name: state tax filing 2017
+      type: FORM
+      note: this is our master document for tax season '17. pilfering washington politicians...
   entity:
     title: Entity
     type: object
@@ -491,7 +474,16 @@ definitions:
   organization:
     title: Organization
     type: object
+    additionalProperties: false
     properties:
+      org_id:
+        type: string
+        format: uuid
+        description: UUID for the organization. This value is guaranteed to be unique amongst organizations
+      create_datetime:
+        type: string
+        format: date-time
+        description: datetime string representing organization creation time.
       type:
         type: string
         enum:
@@ -508,6 +500,8 @@ definitions:
           type: string
           format: uuid
     example:
+      org_id: f29d61da-e7b3-4577-b426-c6660d38f97c
+      create_datetime: '2015-04-17T20:50:36Z'
       type: BUYER
       name: bob's burgers
       users:
@@ -517,24 +511,53 @@ definitions:
   organization-readonly:
     title: Organization ReadOnly
     type: object
+    additionalProperties: false
     properties:
       org_id:
         type: string
         format: uuid
-        description: UUID for the organization. This value is guaranteed to be unique amongst organizations.
+        description: UUID for the organization. This value is guaranteed to be unique amongst organizations
       create_datetime:
         type: string
         format: date-time
-        description: datetime string representing organization creation datetime.
-    required:
-      - org_id
+        description: datetime string representing organization creation time.
+      type:
+        type: string
+        enum:
+          - BUYER
+          - VENDOR
+        default: BUYER
+      name:
+        type: string
+        pattern: '[a-zA-Z0-9-_ '']+'
+      users:
+        type: array
+        description: list of users (by `user_id` ) who are members of the organization.
+        items:
+          type: string
+          format: uuid
     example:
-      id: 246bfd6d-2aed-47d7-8fde-cb05aabfcd4f
-      create_datetime: '2017-04-16T13:49:13Z'
+      org_id: f29d61da-e7b3-4577-b426-c6660d38f97c
+      create_datetime: '2015-04-17T20:50:36Z'
+      type: BUYER
+      name: bob's burgers
+      users:
+        - b85769c0-5b80-4759-ae06-5881e8c85d77
+        - af125212-7e30-47be-b932-9baf821a615f
+        - af93193a-9e57-4430-8c4e-623d9c4549d1
   resource:
     title: Resource
     type: object
+    additionalProperties: false
     properties:
+      res_id:
+        type: string
+        format: uuid
+        description: UUID for the resource. This value is guaranteed to be unique amongst resources.
+      create_datetime:
+        type: string
+        format: date-time
+        description: datetime string representing resource creation time.
       name:
         type: string
         pattern: '^[A-Za-z0-9_ -]+'
@@ -549,6 +572,8 @@ definitions:
         type: string
         format: uri
     example:
+      res_id: d8603e76-5d49-48e3-b6c4-35e61622675a
+      create_datetime: '2016-08-07T12:52:08Z'
       name: Maryland Chamber of Commerce
       url: 'https://www.mdchamber.org/'
       s3_thumbnail_uri: 'https://bulb-resources.s3.amazonaws.com/MD_Chamber_of_Commerce.png'
@@ -556,6 +581,7 @@ definitions:
   resource-readonly:
     title: Resource ReadOnly
     type: object
+    additionalProperties: false
     properties:
       res_id:
         type: string
@@ -564,16 +590,40 @@ definitions:
       create_datetime:
         type: string
         format: date-time
-        description: datetime string representing resource creation datetime.
-    required:
-      - res_id
+        description: datetime string representing resource creation time.
+      name:
+        type: string
+        pattern: '^[A-Za-z0-9_ -]+'
+      url:
+        type: string
+        format: uri
+        description: 'TODO: deduplicate this property with Document.uri'
+      mailto_uri:
+        type: string
+        pattern: '^mailto:.+\@.+\..+$'
+      s3_thumbnail_uri:
+        type: string
+        format: uri
     example:
-      id: 246bfd6d-2aed-47d7-8fde-cb05aabfcd4f
-      create_datetime: '2017-04-16T13:49:13Z'
+      res_id: d8603e76-5d49-48e3-b6c4-35e61622675a
+      create_datetime: '2016-08-07T12:52:08Z'
+      name: Maryland Chamber of Commerce
+      url: 'https://www.mdchamber.org/'
+      s3_thumbnail_uri: 'https://bulb-resources.s3.amazonaws.com/MD_Chamber_of_Commerce.png'
+      mailto_uri: 'mailto:jpalmeri@mdchamber.org'
   user:
     title: User
     type: object
+    additionalProperties: false
     properties:
+      user_id:
+        type: string
+        format: uuid
+        description: UUID for the user. This value is guaranteed to be unique amongst users.
+      create_datetime:
+        type: string
+        format: date-time
+        description: datetime string representing user creation time.
       email:
         type: string
         format: email
@@ -588,6 +638,8 @@ definitions:
         type: string
         pattern: '^[A-Za-z-_ ]+'
     example:
+      user_id: 4c1fb4fe-b4f0-4b90-bb1d-e36c8cac9ef0
+      create_datetime: '2967-10-01T11:33:21Z'
       email: bob@bobsburgers.com
       organizations:
         - c0d803db-8ab2-429c-bfa1-b17afdd18b5d
@@ -595,6 +647,7 @@ definitions:
   user-readonly:
     title: User ReadOnly
     type: object
+    additionalProperties: false
     properties:
       user_id:
         type: string
@@ -603,12 +656,27 @@ definitions:
       create_datetime:
         type: string
         format: date-time
-        description: datetime string representing user creation datetime.
-    required:
-      - user_id
+        description: datetime string representing user creation time.
+      email:
+        type: string
+        format: email
+      organizations:
+        type: array
+        description: a list of organizations (by id) that the user is a member of.
+        uniqueItems: true
+        items:
+          type: string
+          format: uuid
+      name:
+        type: string
+        pattern: '^[A-Za-z-_ ]+'
     example:
-      id: 246bfd6d-2aed-47d7-8fde-cb05aabfcd4f
-      create_datetime: '2017-04-16T13:49:13Z'
+      user_id: 4c1fb4fe-b4f0-4b90-bb1d-e36c8cac9ef0
+      create_datetime: '2967-10-01T11:33:21Z'
+      email: bob@bobsburgers.com
+      organizations:
+        - c0d803db-8ab2-429c-bfa1-b17afdd18b5d
+      name: bob
   user-input:
     title: User Input
     $ref: '#/definitions/user'

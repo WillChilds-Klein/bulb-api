@@ -27,7 +27,7 @@ do_post /documents '{"name": "taxes", "organization": "1"}'
 do_post /documents '{"name": "taxes", "organization": "1"}'
 
 # populate resources
-do_post /resources '{"name": "CA Employee Registration", "processing_time": 60, "status": "NOT_STARTED", 
-                     "type": "FORM", "uri": "https://bulb-resources.s3.amazonaws.com/c166bf45-0421-4df1-9fb6-b5cf091ae57d"}'
-do_post /resources '{"name": "CA Liquor License Guide", "processing_time": 15, "status": "IN_PROGRESS",
-                     "type": "GUIDE", "uri": "https://bulb-resources.s3.amazonaws.com/c166bf45-0421-4df1-9fb6-b5cf091ae57d"}'
+do_post /resources '{"name": "Shitty Services", "s3_thumbnail_uri": "https://yourmom.s3.amazonaws.com/foo.png", 
+                     "url": "http://www.shittyservices.net", "mailto_uri": "mailto:person@shittyservices.net"}'
+do_post /resources '{"name": "MA SBA", "s3_thumbnail_uri": "https://yourmom.s3.amazonaws.com/sba.png", 
+                     "url": "http://www.sba.gov", "mailto_uri": "mailto:govt_drone_69@sba.gov"}'
