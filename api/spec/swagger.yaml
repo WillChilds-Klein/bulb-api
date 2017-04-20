@@ -403,7 +403,6 @@ definitions:
   document:
     title: Document
     type: object
-    additionalProperties: false
     properties:
       organization:
         type: string
@@ -492,7 +491,6 @@ definitions:
   organization:
     title: Organization
     type: object
-    additionalProperties: false
     properties:
       type:
         type: string
@@ -536,7 +534,6 @@ definitions:
   resource:
     title: Resource
     type: object
-    additionalProperties: false
     properties:
       name:
         type: string
@@ -576,7 +573,6 @@ definitions:
   user:
     title: User
     type: object
-    additionalProperties: false
     properties:
       email:
         type: string

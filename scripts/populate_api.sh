@@ -10,7 +10,7 @@ do_post() {
     local endpoint="$1"
     local json="$2"
     echo $json | \
-        http POST "$base_url/$(basename $endpoint)"
+        http --check-status POST "$base_url/$(basename $endpoint)"
 }
 
 # populate users
