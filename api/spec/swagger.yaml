@@ -441,6 +441,17 @@ definitions:
         type: string
         maxLength: 140
         description: A short note to be attached to the document.
+    required:
+      - doc_id
+      - create_datetime
+      - organization
+      - uri
+      - due_date
+      - progress
+      - status
+      - name
+      - type
+      - note
     example:
       doc_id: 476b329e-feb6-4237-a3ca-7844b1d0b598
       create_datetime: '2016-07-11T12:16:06Z'
@@ -536,6 +547,12 @@ definitions:
         items:
           type: string
           format: uuid
+    required:
+      - org_id
+      - create_datetime
+      - type
+      - name
+      - users
     example:
       org_id: f29d61da-e7b3-4577-b426-c6660d38f97c
       create_datetime: '2015-04-17T20:50:36Z'
@@ -604,6 +621,13 @@ definitions:
       s3_thumbnail_uri:
         type: string
         format: uri
+    required:
+      - res_id
+      - create_datetime
+      - name
+      - url
+      - mailto_uri
+      - s3_thumbnail_uri
     example:
       res_id: d8603e76-5d49-48e3-b6c4-35e61622675a
       create_datetime: '2016-08-07T12:52:08Z'
@@ -670,6 +694,12 @@ definitions:
       name:
         type: string
         pattern: '^[A-Za-z-_ ]+'
+    required:
+      - user_id
+      - create_datetime
+      - email
+      - organizations
+      - name
     example:
       user_id: 4c1fb4fe-b4f0-4b90-bb1d-e36c8cac9ef0
       create_datetime: '2967-10-01T11:33:21Z'
