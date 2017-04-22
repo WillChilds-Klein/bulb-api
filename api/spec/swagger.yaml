@@ -446,12 +446,8 @@ definitions:
       - create_datetime
       - organization
       - uri
-      - due_date
-      - progress
       - status
       - name
-      - type
-      - note
     example:
       doc_id: 476b329e-feb6-4237-a3ca-7844b1d0b598
       create_datetime: '2016-07-11T12:16:06Z'
@@ -507,6 +503,9 @@ definitions:
       users:
         type: array
         description: list of users (by `user_id` ) who are members of the organization.
+        uniqueItems: true
+        minItems: 1
+        maxItems: 100
         items:
           type: string
           format: uuid
@@ -544,6 +543,9 @@ definitions:
       users:
         type: array
         description: list of users (by `user_id` ) who are members of the organization.
+        uniqueItems: true
+        minItems: 1
+        maxItems: 100
         items:
           type: string
           format: uuid
@@ -626,8 +628,6 @@ definitions:
       - create_datetime
       - name
       - url
-      - mailto_uri
-      - s3_thumbnail_uri
     example:
       res_id: d8603e76-5d49-48e3-b6c4-35e61622675a
       create_datetime: '2016-08-07T12:52:08Z'
@@ -655,6 +655,8 @@ definitions:
         type: array
         description: a list of organizations (by id) that the user is a member of.
         uniqueItems: true
+        minItems: 1
+        maxItems: 10
         items:
           type: string
           format: uuid
@@ -688,6 +690,8 @@ definitions:
         type: array
         description: a list of organizations (by id) that the user is a member of.
         uniqueItems: true
+        minItems: 1
+        maxItems: 10
         items:
           type: string
           format: uuid
