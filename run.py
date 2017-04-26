@@ -17,7 +17,7 @@ def cli():
 @click.option('--debug/--no-debug', default=True, help='run in debug mode')
 def local(port, debug):
     """ Run the bulb API locally """
-    app.run(port=port, host='localhost')
+    app.run(port=port, host='0.0.0.0')
 
 
 @click.group()
@@ -25,6 +25,7 @@ def local(port, debug):
 def db():
     """ Manage database(s). """
     pass
+
 
 @db.command()
 def run():

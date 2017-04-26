@@ -2,6 +2,7 @@
     "dev": {
         "app_function": "api.app",
         "s3_bucket": "zappa-w6m21iqjw",
+        "aws_region": "us-east-1",
         "domain": "dev.buttaface.space",
         "lets_encrypt_key": "s3://zappa-util/lets_encrypt.key",
         "lets_encrypt_expression": "rate(45 days)",
