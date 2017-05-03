@@ -3,145 +3,135 @@ from datetime import datetime
 from pynamodb.exceptions import DeleteError
 from uuid import uuid4
 
-from .models import User
+from .models import BulbModel, Document, Organization, Resource, User
 
-
-org_db = {}
-doc_db = {}
-res_db = {}
 
 DATETIME_FMT = '%Y-%m-%dT%H:%M:%SZ'
 
 
 def get_organization(org_id):
-    if org_id in org_db:
-        return org_db[org_id], 200
-    return NoContent, 404
+    return get_entity(Organization, org_id)
 
 
 def update_organization(body, org_id):
-    if org_id in org_db:
-        org_db[org_id].update(body)
-        return org_db[org_id], 200
-    return NoContent, 404
+    return update_entity(Organization, org_id, body)
 
 
 def delete_organization(org_id):
-    if org_id in org_db:
-        del org_db[org_id]
-        return NoContent, 200
-    return NoContent, 404
+    return delete_entity(Organization, org_id)
 
 
 def list_organizations():
-    return org_db.values(), 200
+    return list_entity(Organization)
 
 
 def create_organization(body):
-    org_id = str(uuid4())
-    body['org_id'] = org_id
-    body['create_datetime'] = datetime.utcnow().strftime(DATETIME_FMT)
-    org_db[org_id] = body
-    return org_db[org_id], 200
+    return create_entity(Organization, body)
 
 
 def get_document(doc_id):
-    if doc_id in doc_db:
-        return doc_db[doc_id], 200
-    return NoContent, 404
+    return get_entity(Document, doc_id)
 
 
 def update_document(body, doc_id):
-    if doc_id in doc_db:
-        doc_db[doc_id].update(body)
-        return doc_db[doc_id], 200
-    return NoContent, 404
+    return update_entity(Document, doc_id, body)
 
 
 def delete_document(doc_id):
-    if doc_id in doc_db:
-        del doc_db[doc_id]
-        return NoContent, 200
-    return NoContent, 404
+    return delete_entity(Document, doc_id)
 
 
 def list_documents():
-    return doc_db.values(), 200
+    return list_entity(Document)
 
 
 def create_document(body):
-    doc_id = str(uuid4())
-    body['doc_id'] = doc_id
-    body['create_datetime'] = datetime.utcnow().strftime(DATETIME_FMT)
-    doc_db[doc_id] = body
-    return doc_db[doc_id], 200
+    return create_entity(Document, body)
 
 
 def get_user(user_id):
-    try:
-        return User.get(user_id).to_dict(), 200
-    except User.DoesNotExist:
-        return NoContent, 404
+    return get_entity(User, res_id)
 
 
 def update_user(body, user_id):
-    try:
-        user = User.get(user_id)
-    except User.DoesNotExist:
-        return NoContent, 404
-    user.update_from_dict(body)
-    user.save()
-    return user.to_dict(), 200
+    return update_entity(User, res_id, body)
 
 
 def delete_user(user_id):
-    try:
-        User.get(user_id).delete()
-    except DeleteError:
-        return NoContent, 404
-    return NoContent, 200
+    return delete_entity(User, res_id)
 
 
 def list_users():
-    users = [user.to_dict() for user in User.scan()]
-    return users, 200
+    return list_entity(User)
 
 
 def create_user(body):
-    user = User(User.get_unused_uuid())
-    user.init_from_dict(body)
-    user.create_datetime = datetime.utcnow()
-    user.save()
-    return user.to_dict(), 200
+    return create_entity(User, body)
 
 
 def get_resource(res_id):
-    if res_id in res_db:
-        return res_db[res_id], 200
-    return NoContent, 404
+    return get_entity(Resource, res_id)
 
 
 def update_resource(body, res_id):
-    if res_id in res_db:
-        res_db[res_id].update(body)
-        return res_db[res_id], 200
-    return NoContent, 404
+    return update_entity(Resource, res_id, body)
 
 
 def delete_resource(res_id):
-    if res_id in res_db:
-        del res_db[res_id]
-        return NoContent, 200
-    return NoContent, 404
+    return delete_entity(Resource, res_id)
 
 
 def list_resources():
-    return res_db.values(), 200
+    return list_entity(Resource)
 
 
 def create_resource(body):
-    res_id = str(uuid4())
-    body['res_id'] = res_id
-    body['create_datetime'] = datetime.utcnow().strftime(DATETIME_FMT)
-    res_db[res_id] = body
-    return res_db[res_id], 200
+    return create_entity(Resource, body)
+
+
+def create_entity(model, body):
+    if not issubclass(model, BulbModel):
+        raise Exception('`model` must be subclass of BulbModel!')
+    entity = model(model.get_unused_uuid())
+    entity.update_from_dict(body)
+    entity.create_datetime = datetime.utcnow()
+    entity.save()
+    return entity.to_dict(), 200
+
+
+def get_entity(model, entity_id):
+    if not issubclass(model, BulbModel):
+        raise Exception('`model` must be subclass of BulbModel!')
+    try:
+        return model.get(entity_id).to_dict(), 200
+    except entity.DoesNotExist:
+        return NoContent, 404
+
+
+def list_entity(model):
+    if not issubclass(model, BulbModel):
+        raise Exception('`model` must be subclass of BulbModel!')
+    entities = [entity.to_dict() for entity in model.scan()]
+    return entities, 200
+
+
+def update_entity(model, entity_id, body):
+    if not issubclass(model, BulbModel):
+        raise Exception('`model` must be subclass of BulbModel!')
+    try:
+        entity = model.get(entity_id)
+    except entity.DoesNotExist:
+        return NoContent, 404
+    entity.update_from_dict(body)
+    entity.save()
+    return entity.to_dict(), 200
+
+
+def delete_entity(model, entity_id):
+    if not issubclass(model, BulbModel):
+        raise Exception('`model` must be subclass of BulbModel!')
+    try:
+        model.get(entity_id).delete()
+    except DeleteError:
+        return NoContent, 404
+    return NoContent, 200
