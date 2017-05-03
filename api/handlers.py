@@ -1,7 +1,6 @@
 from connexion import NoContent
 from datetime import datetime
 from pynamodb.exceptions import DeleteError
-from uuid import uuid4
 
 from .models import BulbModel, Document, Organization, Resource, User
 
@@ -50,15 +49,15 @@ def create_document(body):
 
 
 def get_user(user_id):
-    return get_entity(User, res_id)
+    return get_entity(User, user_id)
 
 
 def update_user(body, user_id):
-    return update_entity(User, res_id, body)
+    return update_entity(User, user_id, body)
 
 
 def delete_user(user_id):
-    return delete_entity(User, res_id)
+    return delete_entity(User, user_id)
 
 
 def list_users():
@@ -104,7 +103,7 @@ def get_entity(model, entity_id):
         raise Exception('`model` must be subclass of BulbModel!')
     try:
         return model.get(entity_id).to_dict(), 200
-    except entity.DoesNotExist:
+    except model.DoesNotExist:
         return NoContent, 404
 
 

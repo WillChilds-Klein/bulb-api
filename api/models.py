@@ -1,13 +1,12 @@
-from uuid import UUID, uuid4
-from datetime import datetime
+from uuid import uuid4
 from pynamodb.models import Model
 from pynamodb.attributes import (
-        Attribute,
         UnicodeAttribute,
         ListAttribute,
         NumberAttribute,
         UTCDateTimeAttribute
 )
+
 
 class BulbModel(Model):
     # def __repr__(self):   # TODO
@@ -30,14 +29,13 @@ class BulbModel(Model):
             candidate = str(uuid4())
             try:
                 cls.get(candidate)
-                print '{}: ID {} already in use!'.format(self.Meta.table_name,
+                print '{}: ID {} already in use!'.format(cls.Meta.table_name,
                                                         candidate)
             except cls.DoesNotExist:
                 return candidate
         else:
             msg = 'Can\'t find unique UUID after {} tries!'.format(max_tries)
             raise Exception(msg)
-
 
     def to_dict(self):
         return dict(self.attribute_values)
