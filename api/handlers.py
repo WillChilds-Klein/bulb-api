@@ -1,11 +1,13 @@
 from connexion import NoContent
 from datetime import datetime
+from pynamodb.exceptions import DeleteError
 from uuid import uuid4
+
+from .models import User
 
 
 org_db = {}
 doc_db = {}
-user_db = {}
 res_db = {}
 
 DATETIME_FMT = '%Y-%m-%dT%H:%M:%SZ'
@@ -76,35 +78,41 @@ def create_document(body):
 
 
 def get_user(user_id):
-    if user_id in user_db:
-        return user_db[user_id], 200
-    return NoContent, 404
+    try:
+        return User.get(user_id).to_dict(), 200
+    except User.DoesNotExist:
+        return NoContent, 404
 
 
 def update_user(body, user_id):
-    if user_id in user_db:
-        user_db[user_id].update(body)
-        return user_db[user_id], 200
-    return NoContent, 404
+    try:
+        user = User.get(user_id)
+    except User.DoesNotExist:
+        return NoContent, 404
+    user.update_from_dict(body)
+    user.save()
+    return user.to_dict(), 200
 
 
 def delete_user(user_id):
-    if user_id in user_db:
-        del user_db[user_id]
-        return NoContent, 200
-    return NoContent, 404
+    try:
+        User.get(user_id).delete()
+    except DeleteError:
+        return NoContent, 404
+    return NoContent, 200
 
 
 def list_users():
-    return user_db.values(), 200
+    users = [user.to_dict() for user in User.scan()]
+    return users, 200
 
 
 def create_user(body):
-    user_id = str(uuid4())
-    body['user_id'] = user_id
-    body['create_datetime'] = datetime.utcnow().strftime(DATETIME_FMT)
-    user_db[user_id] = body
-    return user_db[user_id], 200
+    user = User(User.get_unused_uuid())
+    user.init_from_dict(body)
+    user.create_datetime = datetime.utcnow()
+    user.save()
+    return user.to_dict(), 200
 
 
 def get_resource(res_id):

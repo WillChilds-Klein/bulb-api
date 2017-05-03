@@ -59,9 +59,9 @@ do_post /organizations '{"name": "ginos pizza", "users": ["2","3"], "type": "BUY
 do_post /organizations '{"name": "local foods ltd.", "users": ["8","9"], "type": "VENDOR"}'
 
 # populate resources
-do_post /resources '{"name": "Shitty Services", "s3_thumbnail_uri": "https://yourmom.s3.amazonaws.com/foo.png", 
+do_post /resources '{"name": "Shitty Services", "s3_thumbnail_uri": "https://yourmom.s3.amazonaws.com/foo.png",
                      "url": "http://www.shittyservices.net", "mailto_uri": "mailto:person@shittyservices.net"}'
-do_post /resources '{"name": "MA SBA", "s3_thumbnail_uri": "https://yourmom.s3.amazonaws.com/sba.png", 
+do_post /resources '{"name": "MA SBA", "s3_thumbnail_uri": "https://yourmom.s3.amazonaws.com/sba.png",
                      "url": "http://www.sba.gov", "mailto_uri": "mailto:govt_drone_69@sba.gov"}'
 
 # populate users
