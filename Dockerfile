@@ -29,4 +29,4 @@ EXPOSE 8080
 
 ENTRYPOINT ["/bin/venv_exec"]
 
-CMD ["./run.py", "local"]
+CMD ["./run.py", "prod"]

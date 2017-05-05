@@ -94,7 +94,10 @@ def create_entity(model, body):
     entity = model(model.get_unused_uuid())
     entity.update_from_dict(body)
     entity.create_datetime = datetime.utcnow()
-    entity.save()
+    try:
+        entity.save()
+    except ValueError as e:
+        return e.message, 400
     return entity.to_dict(), 200
 
 
