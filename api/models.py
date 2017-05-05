@@ -1,11 +1,14 @@
-from uuid import uuid4
-from pynamodb.models import Model
+import os
+import uuid
+
 from pynamodb.attributes import (
         UnicodeAttribute,
         ListAttribute,
         NumberAttribute,
         UTCDateTimeAttribute
 )
+from pynamodb.exceptions import GetError
+from pynamodb.models import Model
 
 
 class BulbModel(Model):
@@ -13,7 +16,9 @@ class BulbModel(Model):
     # TODO: make this an abstract class
 
     class Meta:
-        host = 'http://localhost:8000'
+        host = None
+        if os.environ.get('FLASK_DEBUG'):
+            host = 'http://localhost:8000'
         read_capacity_units = 1
         write_capacity_units = 1
 
@@ -26,12 +31,14 @@ class BulbModel(Model):
     def get_unused_uuid(cls):
         max_tries = 3
         for _ in range(max_tries):
-            candidate = str(uuid4())
+            candidate = str(uuid.uuid4())
             try:
                 cls.get(candidate)
                 print '{}: ID {} already in use!'.format(cls.Meta.table_name,
                                                         candidate)
             except cls.DoesNotExist:
+                return candidate
+            except GetError:
                 return candidate
         else:
             msg = 'Can\'t find unique UUID after {} tries!'.format(max_tries)

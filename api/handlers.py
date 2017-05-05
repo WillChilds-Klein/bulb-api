@@ -119,7 +119,7 @@ def update_entity(model, entity_id, body):
         raise Exception('`model` must be subclass of BulbModel!')
     try:
         entity = model.get(entity_id)
-    except entity.DoesNotExist:
+    except model.DoesNotExist:
         return NoContent, 404
     entity.update_from_dict(body)
     entity.save()
