@@ -1,4 +1,5 @@
 import os
+import re
 import uuid
 
 from pynamodb.attributes import (
@@ -16,9 +17,11 @@ class BulbModel(Model):
     # TODO: make this an abstract class
 
     class Meta:
-        host = None
+        host = None     # if this stays None, we'll use prod DDB
         if os.environ.get('FLASK_DEBUG'):
-            host = 'http://localhost:8000'
+            # try to grab + clean URL for ddb_local container if it's --link'd
+            host = os.environ.get('DDB_LOCAL_PORT', 'http://localhost:8000')
+            host = re.sub('tcp', 'http', host)
         read_capacity_units = 1
         write_capacity_units = 1
 

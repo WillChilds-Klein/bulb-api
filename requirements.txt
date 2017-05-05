@@ -1,11 +1,13 @@
 appdirs==1.4.3
 argcomplete==1.8.2
+Babel==2.4.0
 base58==0.2.4
 boto3==1.4.4
 botocore==1.5.40
 click==6.7
 clickclick==1.2.1
 connexion==1.0.129
+Delorean==0.6.0
 docutils==0.13.1
 durationpy==0.4
 dynamo3==0.4.10
@@ -14,6 +16,7 @@ functools32==3.2.3.post2
 future==0.16.0
 futures==3.1.1
 hjson==2.0.2
+humanize==0.5.1
 inflection==0.3.1
 itsdangerous==0.24
 Jinja2==2.9.6
@@ -27,9 +30,12 @@ pathlib==1.0.1
 placebo==0.8.1
 pluggy==0.4.0
 py==1.4.33
+pynamodb==2.1.5
 pyparsing==2.2.0
+pytest==3.0.7
 python-dateutil==2.6.0
 python-slugify==1.2.4
+pytz==2017.2
 PyYAML==3.12
 requests==2.13.0
 s3transfer==0.1.10
@@ -39,6 +45,7 @@ swagger-spec-validator==2.1.0
 toml==0.9.2
 tqdm==4.11.2
 troposphere==1.9.3
+tzlocal==1.4
 Unidecode==0.4.20
 virtualenv==15.1.0
 Werkzeug==0.12

@@ -7,46 +7,53 @@ usage() {
     echo "  -d          detach container from std{out,in}"
     echo "  -h          print this message and exit"
     echo "  -i IMAGE    which image/container to run"
+    echo "  -l CNTNR    link to another local container"
+    echo "  --no-link   don't link any containers to this one"
     echo "  -n NAME     container's name"
     echo "  -p PORT     port to link to localhost"
+    echo "  --prod      run without FLASK_DEBUG set"
     echo "              NOTE: must specify port to run.py manually"
     echo "  -v          verbose, enable -x"
     fi
     exit $exit_code
 }
 
-export_arg () {
-    if [[ -z $1 ]] || [[ -z $2 ]]; then
-        usage 1
-    else
-        export "$1"="$2"
-    fi
-}
-
 DETACH=
 IMAGE="lambda"
+LINK="ddb_local"
 NAME="api"
 PORT=8080
+PROD=
 VERBOSE=
 while [[ $# -gt 0 ]]; do
     case "$1" in
         -d|--detach)
             DETACH=1
             ;;
-        -i|--image)
-            export_arg IMAGE $2
-            shift
-            ;;
         -h|--help)
             usage 0
             ;;
+        -i|--image)
+            IMAGE=$2
+            shift
+            ;;
+        -l|--link)
+            LINK=$2
+            shift
+            ;;
+        --no-link)
+            LINK=
+            ;;
         -n|--name)
-            export_arg NAME $2
+            NAME=$2
             shift
             ;;
         -p|--port)
-            export_arg PORT $2
+            PORT=$2
             shift
+            ;;
+        --prod)
+            PROD=1
             ;;
         -v|--verbose)
             VERBOSE=1
@@ -66,12 +73,13 @@ set -e
 
 docker run --rm \
            $([[ -n $DETACH ]] && echo -n '-d ') \
+           $([[ -n $LINK ]] && echo -n "--link $LINK") \
            --name "$NAME" \
            -p ${PORT}:${PORT} \
            -v "$(pwd)":/var/bulb \
            -e AWS_ACCESS_KEY_ID="$(aws configure get aws_access_key_id)" \
            -e AWS_SECRET_ACCESS_KEY="$(aws configure get aws_secret_access_key)" \
-           -e AWS_DEFUALT_REGION="$(aws configure get region)" \
-           -e FLASK_DEBUG='1' \
+           -e AWS_DEFAULT_REGION="$(aws configure get region)" \
+           $([[ -z $PROD ]] && echo -n '-e FLASK_DEBUG=1') \
     ${IMAGE} \
     $@
