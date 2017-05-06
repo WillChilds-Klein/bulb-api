@@ -1,4 +1,4 @@
-from api.models import BulbModel
+from bulb_api.models import BulbModel
 
 
 def test_get_hash_key_name():

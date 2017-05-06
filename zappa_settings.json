@@ -1,6 +1,6 @@
 {
     "dev": {
-        "app_function": "api.app",
+        "app_function": "bulb_api.app",
         "s3_bucket": "zappa-w6m21iqjw",
         "aws_region": "us-east-1",
         "domain": "dev.buttaface.space",

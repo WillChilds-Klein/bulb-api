@@ -1,4 +1,4 @@
-from api.handlers import (
+from bulb_api.handlers import (
     create_entity,
     get_entity,
     list_entity,

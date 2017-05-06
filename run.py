@@ -4,7 +4,7 @@ import click
 import pytest
 import sys
 
-from api import app
+from bulb_api import app
 
 
 @click.group()

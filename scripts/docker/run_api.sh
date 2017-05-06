@@ -21,7 +21,7 @@ usage() {
 DETACH=
 IMAGE="lambda"
 LINK="ddb_local"
-NAME="api"
+NAME="bulb_api"
 PORT=8080
 PROD=
 VERBOSE=
