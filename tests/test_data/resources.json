@@ -1,0 +1,14 @@
+[
+    {
+        "name": "Shitty Services",
+        "s3_thumbnail_uri": "https://yourmom.s3.amazonaws.com/foo.png",
+        "url": "http://www.shittyservices.net",
+        "mailto_uri": "mailto:person@shittyservices.net"
+    },
+    {
+        "name": "MA SBA",
+        "s3_thumbnail_uri": "https://yourmom.s3.amazonaws.com/sba.png",
+        "url": "http://www.sba.gov",
+        "mailto_uri": "mailto:govt_drone_69@sba.gov"
+    }
+]

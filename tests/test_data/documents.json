@@ -1,0 +1,14 @@
+[
+    {
+        "name": "taxes",
+        "organization": "1",
+        "uri": "https://bulb-documents.s3.amazonaws.com/this_documents_uuid",
+        "status": "IN_PROGRESS"
+    },
+    {
+        "name": "wages",
+        "organization": "2",
+        "uri": "https://bulb-documents.s3.amazonaws.com/this_documents_uuid",
+        "status": "NOT_STARTED"
+    }
+]

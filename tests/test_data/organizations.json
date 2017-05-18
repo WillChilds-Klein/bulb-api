@@ -1,0 +1,25 @@
+[
+    {
+        "name": "mass chicken",
+        "users": [
+            "1"
+        ],
+        "type": "BUYER"
+    },
+    {
+        "name": "ginos pizza",
+        "users": [
+            "2",
+            "3"
+        ],
+        "type": "BUYER"
+    },
+    {
+        "name": "local foods ltd.",
+        "users": [
+            "8",
+            "9"
+        ],
+        "type": "VENDOR"
+    }
+]

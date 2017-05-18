@@ -98,7 +98,7 @@ def create_entity(model, body):
         entity.save()
     except ValueError as e:
         return e.message, 400
-    return entity.to_dict(), 200
+    return entity.to_dict(), 201
 
 
 def get_entity(model, entity_id):

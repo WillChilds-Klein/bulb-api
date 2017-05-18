@@ -1,4 +1,6 @@
 import connexion
+import logging
+import re
 
 from flask_cors import CORS
 
@@ -15,7 +17,9 @@ def create_app(cfg_path=None):
 
     # supp_creds for allowing cookie/auth headers to be passed. still need to
     # implement CSRF protection though... <-- TODO
-    CORS(app, supports_credentials=True)
+    CORS(app, **app.config['CORS_CFG'])
+
+    # logging.basicConfig(level=logging.INFO if not app.debug else logging.DEBUG)
 
     # TODO: move this to some init_app function so this isn't being called on
     #       startup every time.

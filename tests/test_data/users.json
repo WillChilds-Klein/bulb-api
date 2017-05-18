@@ -1,0 +1,23 @@
+[
+    {
+        "name": "harold",
+        "email": "harry@balls.com",
+        "organizations": [
+            "1"
+        ]
+    },
+    {
+        "name": "gino",
+        "email": "gino@greasypizza.com",
+        "organizations": [
+            "2"
+        ]
+    },
+    {
+        "name": "gina",
+        "email": "gina@greasypizza.com",
+        "organizations": [
+            "2"
+        ]
+    }
+]
