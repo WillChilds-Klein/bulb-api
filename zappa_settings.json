@@ -4,8 +4,8 @@
         "s3_bucket": "zappa-w6m21iqjw",
         "aws_region": "us-east-1",
         "domain": "dev.buttaface.space",
-        "lets_encrypt_key": "s3://zappa-util/lets_encrypt.key",
-        "lets_encrypt_expression": "rate(45 days)",
+        "route53_enabled": true,
+        "certificate_arn": "arn:aws:acm:us-east-1:724943322837:certificate/b7e475aa-3765-435b-a87f-19aa5be7d843",
         "timeout_seconds": 60,
         "log_level": "DEBUG"
     }
