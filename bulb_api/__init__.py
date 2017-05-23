@@ -1,6 +1,5 @@
 import connexion
 import logging
-import re
 
 from flask_cors import CORS
 

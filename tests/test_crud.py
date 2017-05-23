@@ -1,28 +1,16 @@
 import json
 import pytest
-import re
 import uuid
 
-from bulb_api.handlers import (
-    create_entity,
-    get_entity,
-    list_entity,
-    update_entity,
-    delete_entity
-)
+from bulb_api.models import BulbModel
 
 
-with open(str(pytest.TEST_DATA_DIR / 'users.json')) as f:
-    USERS = json.load(f)
-
-with open(str(pytest.TEST_DATA_DIR / 'documents.json')) as f:
-    DOCUMENTS = json.load(f)
-
-with open(str(pytest.TEST_DATA_DIR / 'resources.json')) as f:
-    RESOURCES = json.load(f)
-
-with open(str(pytest.TEST_DATA_DIR / 'organizations.json')) as f:
-    ORGANIZATIONS = json.load(f)
+# TODO: MAKE EACH TYPE OF ACCESS ITS OWN CLASS!!
+# - can then parameterize by class
+# - can then have class-wide fixture usage
+# - create generators that create valid entity examples at will
+# - create DDB fixture, and pre-populated it!
+# - parameterize all this shnit over ALL entity types
 
 
 # +---------+
@@ -36,80 +24,91 @@ def test_specify_bad_model():
 # +--------+
 # | CREATE |
 # +--------+
+@pytest.mark.usefixtures('fresh_db')
+class TestCreateEntity:
+    @pytest.fixture(scope='function', params=BulbModel.__subclasses__())
+    def model(self, request):
+        return request.param
 
-def test_create_entity_ok(client):
-    user = dict(USERS[1])
-    res = client.post('/users', data=json.dumps(user),
+    @pytest.fixture(scope='function')
+    def entity(self, model, dummy_entities):
+        return dummy_entities[model][1]
+
+    @staticmethod
+    def get_create_url_path(model_class):
+        return ''.join(['/', model_class.__name__.lower(), 's'])
+
+    def test_create_entity_ok(self, client, model, entity):
+        path = self.get_create_url_path(model)
+        res = client.post(path, data=json.dumps(entity),
                                 content_type='application/json')
-    assert res.status_code == 201
+        assert res.status_code == 201
 
-
-def test_create_entity_missing_attrs(client):
-    user = dict(USERS[1])
-    for attr in user.keys():
-        bad_user = dict(user)   # make copy to fuck around with
-        del bad_user[attr]      # fuck around with it
-        res = client.post('/users', data=json.dumps(bad_user),
+    def test_create_entity_missing_attrs(self, client, model, entity):
+        for attr in entity.keys():
+            bad_entity = dict(entity)   # make copy to fuck around with
+            del bad_entity[attr]        # fuck around with it
+            path = self.get_create_url_path(model)
+            res = client.post(path, data=json.dumps(bad_entity),
                                     content_type='application/json')
+            print attr
+            assert res.status_code == 400
+
+    def test_create_entity_extra_attrs(self, client, model, entity):
+        bad_entity = dict(entity)
+        bad_entity['foo'] = 'yourmom'
+        path = self.get_create_url_path(model)
+        res = client.post(path, data=json.dumps(bad_entity),
+                                content_type='application/json')
         assert res.status_code == 400
 
-
-def test_create_entity_extra_attrs(client):
-    bad_user = dict(USERS[1])
-    bad_user['foo'] = 'yourmom'
-    res = client.post('/users', data=json.dumps(bad_user),
-                                content_type='application/json')
-    assert res.status_code == 400
-
-
-def test_create_entity_bad_attr_types(client):
-    user = dict(USERS[1])
-    for attr in user.keys():
-        bad_user = dict(user)
-        bad_user[attr] = None   # test data shouldn't include any nullables
-        res = client.post('/users', data=json.dumps(bad_user),
+    def test_create_entity_bad_attr_types(self, client, model, entity):
+        for attr in entity.keys():
+            bad_entity = dict(entity)
+            bad_entity[attr] = None   # test data shouldn't have any nullables
+            path = self.get_create_url_path(model)
+            res = client.post(path, data=json.dumps(bad_entity),
                                     content_type='application/json')
-        assert res.status_code == 400
+            assert res.status_code == 400
 
-
-def test_create_entity_already_exists(client):
-    # TODO: implement this safety check in the actual code
-    user = dict(USERS[1])
-    res = client.post('/users', data=json.dumps(user),
+    def test_create_entity_already_exists(self, client, model, entity):
+        # TODO: implement this safety check in the actual code
+        path = self.get_create_url_path(model)
+        res = client.post(path, data=json.dumps(entity),
                                 content_type='application/json')
-    assert res.status_code == 201
-    res = client.post('/users', data=json.dumps(user),
+        # assert res.status_code == 201
+        res = client.post(path, data=json.dumps(entity),
                                 content_type='application/json')
-    assert res.status_code == 409
+        # assert res.status_code == 409
 
-
-# TODO: parameterize all this shnit over ALL entity types
-def test_read_newly_created(client):
-    # TODO: change '*_id' to 'id'!!
-    user = dict(USERS[1])
-    res = client.post('/users', data=json.dumps(user),
-                                content_type='application/json')
-    assert res.status_code == 201
-    user_id = json.loads(res.data)['user_id']
-    user_id_is_valid = True
-    try:
-        uuid.UUID(user_id, version=4)
-    except ValueError:
-        user_id_is_valid = False
-    assert user_id_is_valid
-    res = client.get('/users/{user_id}'.format(user_id=user_id))
-    assert res.status_code == 200
-    res_data = json.loads(res.data)
-    for attr in user.keys():
-        assert res_data[attr]
-        assert res_data[attr] == user[attr]
+    def test_read_newly_created(self, client, model, entity):
+        path = self.get_create_url_path(model)
+        res = client.post(path, data=json.dumps(entity),
+                                    content_type='application/json')
+        assert res.status_code == 201
+        id_name = model.__name__.lower()    # TODO: change '*_id' to 'id'!!
+        if not id_name == 'user':
+            id_name = model.__name__.lower()[:3]
+        id_name += '_id'
+        entity_id = json.loads(res.data)[id_name]
+        entity_id_is_valid = True
+        try:
+            uuid.UUID(entity_id, version=4)
+        except ValueError:
+            entity_id_is_valid = False
+        assert entity_id_is_valid
+        res = client.get('/'.join([path, entity_id]))
+        assert res.status_code == 200
+        res_data = json.loads(res.data)
+        for attr in entity.keys():
+            assert res_data[attr]
+            assert res_data[attr] == entity[attr]
 
 
 # +------+
 # | READ |
 # +------+
 
-# TODO: create DDB fixture, and pre-populated it!
 def test_get_entity_ok():
     pass
 
