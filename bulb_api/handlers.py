@@ -91,6 +91,8 @@ def create_resource(body):
 def create_entity(model, body):
     if not issubclass(model, BulbModel):
         raise Exception('`model` must be subclass of BulbModel!')
+    if model().get_hash_key_name() in body.keys():
+        return NoContent, 400
     entity = model(model.get_unused_uuid())
     entity.update_from_dict(body)
     entity.create_datetime = datetime.utcnow()

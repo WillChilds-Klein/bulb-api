@@ -1,3 +1,5 @@
+import datetime
+import dateutil
 import json
 import pytest
 import uuid
@@ -32,7 +34,7 @@ class TestCreateEntity:
 
     @pytest.fixture(scope='function')
     def entity(self, model, dummy_entities):
-        return dummy_entities[model][1]
+        return dict(dummy_entities[model][1])
 
     @staticmethod
     def get_create_url_path(model_class):
@@ -51,7 +53,6 @@ class TestCreateEntity:
             path = self.get_create_url_path(model)
             res = client.post(path, data=json.dumps(bad_entity),
                                     content_type='application/json')
-            print attr
             assert res.status_code == 400
 
     def test_create_entity_extra_attrs(self, client, model, entity):
@@ -84,7 +85,7 @@ class TestCreateEntity:
     def test_read_newly_created(self, client, model, entity):
         path = self.get_create_url_path(model)
         res = client.post(path, data=json.dumps(entity),
-                                    content_type='application/json')
+                                content_type='application/json')
         assert res.status_code == 201
         id_name = model.__name__.lower()    # TODO: change '*_id' to 'id'!!
         if not id_name == 'user':
@@ -103,6 +104,25 @@ class TestCreateEntity:
         for attr in entity.keys():
             assert res_data[attr]
             assert res_data[attr] == entity[attr]
+
+    def test_create_entity_with_hash_key(self, client, model, entity):
+        entity[model().get_hash_key_name()] = str(uuid.uuid4())
+        path = self.get_create_url_path(model)
+        res = client.post(path, data=json.dumps(entity),
+                                content_type='application/json')
+        assert res.status_code == 400
+
+    def test_create_datetime_is_accurate(self, client, model, entity):
+        path = self.get_create_url_path(model)
+        t0  = datetime.datetime.utcnow()
+        res = client.post(path, data=json.dumps(entity),
+                                content_type='application/json')
+        t1  = datetime.datetime.utcnow()
+        assert res.status_code == 201
+        data = json.loads(res.data)
+        t_create = dateutil.parser.parse(data['create_datetime'])
+        t_create = t_create.replace(tzinfo=None)
+        assert t1 > t_create > t0
 
 
 # +------+
