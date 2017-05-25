@@ -1,8 +1,9 @@
-import datetime
 import dateutil
 import json
 import pytest
 import uuid
+
+from datetime import datetime
 
 from bulb_api.models import BulbModel
 
@@ -13,6 +14,30 @@ from bulb_api.models import BulbModel
 # - create generators that create valid entity examples at will
 # - create DDB fixture, and pre-populated it!
 # - parameterize all this shnit over ALL entity types
+
+
+@pytest.fixture(scope='function', params=BulbModel.__subclasses__())
+def model(request):
+    return request.param
+
+
+@pytest.fixture(scope='function')
+def entities(model, dummy_entities):
+    return sorted([dict(entity) for entity in dummy_entities[model]])
+
+
+@pytest.fixture(scope='function')
+def entity_ids(entities):
+    return [str(uuid.uuid4()) for _ in entities]
+
+
+@pytest.fixture(scope='function')
+def prepop_db(fresh_db, model, entities, entity_ids):
+    for entity, entity_id in zip(entities, entity_ids):
+        entity_item = model(entity_id)
+        entity_item.update_from_dict(entity)
+        entity_item.create_datetime = datetime.utcnow()
+        entity_item.save()
 
 
 # +---------+
@@ -28,10 +53,6 @@ def test_specify_bad_model():
 # +--------+
 @pytest.mark.usefixtures('fresh_db')
 class TestCreateEntity:
-    @pytest.fixture(scope='function', params=BulbModel.__subclasses__())
-    def model(self, request):
-        return request.param
-
     @pytest.fixture(scope='function')
     def entity(self, model, dummy_entities):
         return dict(dummy_entities[model][1])
@@ -114,10 +135,10 @@ class TestCreateEntity:
 
     def test_create_datetime_is_accurate(self, client, model, entity):
         path = self.get_create_url_path(model)
-        t0  = datetime.datetime.utcnow()
+        t0  = datetime.utcnow()
         res = client.post(path, data=json.dumps(entity),
                                 content_type='application/json')
-        t1  = datetime.datetime.utcnow()
+        t1  = datetime.utcnow()
         assert res.status_code == 201
         data = json.loads(res.data)
         t_create = dateutil.parser.parse(data['create_datetime'])
@@ -128,46 +149,83 @@ class TestCreateEntity:
 # +------+
 # | READ |
 # +------+
+@pytest.mark.usefixtures('prepop_db')
+class TestGetEntity:
+    @staticmethod
+    def get_get_url_path(model_class, e_id):
+        return ''.join(['/', model_class.__name__.lower(), 's', '/', e_id])
 
-def test_get_entity_ok():
-    pass
+    @staticmethod
+    def get_list_url_path(model_class):
+        return ''.join(['/', model_class.__name__.lower(), 's'])
 
+    def test_get_entity_ok(self, client, model, entities, entity_ids):
+        for entity, entity_id in zip(entities, entity_ids):
+            path = self.get_get_url_path(model, entity_id)
+            res = client.get(path)
+            assert res.status_code == 200
+            res_entity = json.loads(res.data)
+            assert res_entity[model().get_hash_key_name()] == entity_id
+            for attr in entity.keys():
+                assert type(res_entity[attr]) == type(entity[attr])
+                assert res_entity[attr] == entity[attr]
 
-def test_get_entity_not_found():
-    pass
+    def test_get_entity_not_found(self, client, model):
+        bad_id = str(uuid.uuid4())
+        path = self.get_get_url_path(model, bad_id)
+        res = client.get(path)
+        assert res.status_code == 404
 
-
-def test_list_entity_ok():
-    pass
+    def test_list_entity_ok(self, client, model, entities, entity_ids):
+        path = self.get_list_url_path(model)
+        res = client.get(path)
+        assert res.status_code == 200
+        res_entities = json.loads(res.data)
+        assert type(res_entities) == list
+        res_entities = sorted(res_entities)
+        all_the_things = zip(res_entities, entities, entity_ids)
+        for res_entity, entity, entity_id in all_the_things:
+            assert res_entity[model().get_hash_key_name()] == entity_id
+            for attr in entity.keys():
+                assert type(res_entity[attr]) == type(entity[attr])
+                assert res_entity[attr] == entity[attr]
 
 
 # +--------+
 # | UPDATE |
 # +--------+
+@pytest.mark.usefixtures('prepop_db')
+class TestUpdateEntity:
+    def test_update_entity_ok(self):
+        pass
 
-def test_update_entity_ok():
-    pass
+    def test_update_entity_missing_attrs(self):
+        pass
 
+    def test_update_entity_extra_attrs(self):
+        pass
 
-def test_update_entity_missing_attrs():
-    pass
-
-
-def test_update_entity_extra_attrs():
-    pass
-
-
-def test_update_entity_bad_attr_types():
-    pass
+    def test_update_entity_bad_attr_types(self):
+        pass
 
 
 # +--------+
 # | DELETE |
 # +--------+
+@pytest.mark.usefixtures('prepop_db')
+class TestDeleteEntity:
+    @staticmethod
+    def get_delete_url_path(model_class, e_id):
+        return ''.join(['/', model_class.__name__.lower(), 's', '/', e_id])
 
-def test_delete_entity_ok():
-    pass
+    def test_delete_entity_ok(self, client, model, entity_ids):
+        for entity_id in entity_ids:
+            path = self.get_delete_url_path(model, entity_id)
+            res = client.delete(path)
+            assert res.status_code == 200
 
-
-def test_delete_entity_not_found():
-    pass
+    def test_delete_entity_not_found(self, client, model):
+        bad_id = str(uuid.uuid4())
+        path = self.get_delete_url_path(model, bad_id)
+        res = client.delete(path)
+        assert res.status_code == 404

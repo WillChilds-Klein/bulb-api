@@ -72,13 +72,3 @@ def fresh_db():
 
     for model in models:
         model.delete_table()
-
-
-@pytest.fixture(scope='function')
-def prepopulated_db(fresh_db, dummy_entities):
-    # populate db with single entry from top-of-list for each model
-    for model, entity_list in dummy_entities.iteritems():
-        entity_item = model(model.get_unused_uuid())
-        entity_item.update_from_dict(entity_list.pop())
-        entity_item.create_datetime = datetime.utcnow()
-        entity_item.save()

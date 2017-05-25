@@ -1,6 +1,5 @@
 from connexion import NoContent
 from datetime import datetime
-from pynamodb.exceptions import DeleteError
 
 from .models import BulbModel, Document, Organization, Resource, User
 
@@ -136,6 +135,6 @@ def delete_entity(model, entity_id):
         raise Exception('`model` must be subclass of BulbModel!')
     try:
         model.get(entity_id).delete()
-    except DeleteError:
+    except model.DoesNotExist:
         return NoContent, 404
     return NoContent, 200
