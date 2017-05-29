@@ -91,7 +91,7 @@ def create_entity(model, body):
     if not issubclass(model, BulbModel):
         raise Exception('`model` must be subclass of BulbModel!')
     if model().get_hash_key_name() in body.keys():
-        return NoContent, 400
+        return 'Cannot specify hash_key in POST body!', 400
     entity = model(model.get_unused_uuid())
     entity.update_from_dict(body)
     entity.create_datetime = datetime.utcnow()
@@ -121,6 +121,8 @@ def list_entity(model):
 def update_entity(model, entity_id, body):
     if not issubclass(model, BulbModel):
         raise Exception('`model` must be subclass of BulbModel!')
+    if model().get_hash_key_name() in body.keys():
+        return 'Cannot specify hash_key in PUT body!', 400
     try:
         entity = model.get(entity_id)
     except model.DoesNotExist:
