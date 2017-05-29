@@ -19,8 +19,8 @@ def delete_organization(org_id):
     return delete_entity(Organization, org_id)
 
 
-def list_organizations():
-    return list_entity(Organization)
+def list_organizations(offset=0, limit=10):
+    return list_entity(Organization, offset, limit)
 
 
 def create_organization(body):
@@ -39,8 +39,8 @@ def delete_document(doc_id):
     return delete_entity(Document, doc_id)
 
 
-def list_documents():
-    return list_entity(Document)
+def list_documents(offset=0, limit=10):
+    return list_entity(Document, offset, limit)
 
 
 def create_document(body):
@@ -59,8 +59,8 @@ def delete_user(user_id):
     return delete_entity(User, user_id)
 
 
-def list_users():
-    return list_entity(User)
+def list_users(offset=0, limit=10):
+    return list_entity(User, offset, limit)
 
 
 def create_user(body):
@@ -79,8 +79,8 @@ def delete_resource(res_id):
     return delete_entity(Resource, res_id)
 
 
-def list_resources():
-    return list_entity(Resource)
+def list_resources(offset=0, limit=10):
+    return list_entity(Resource, offset, limit)
 
 
 def create_resource(body):
@@ -111,11 +111,14 @@ def get_entity(model, entity_id):
         return NoContent, 404
 
 
-def list_entity(model):
+def list_entity(model, offset, limit):
     if not issubclass(model, BulbModel):
         raise Exception('`model` must be subclass of BulbModel!')
+    # TODO: this is beyond unscalable... :(
     entities = [entity.to_dict() for entity in model.scan()]
-    return entities, 200
+    if offset >= len(entities):
+        return 'Offset larger than number of available entities!', 400
+    return entities[offset:][:limit], 200
 
 
 def update_entity(model, entity_id, body):

@@ -304,9 +304,10 @@ parameters:
     in: query
     description: 'Maximum number of items to return. This should be an integer on the interval [1,65536].'
     type: integer
+    default: 10
     minimum: 1
     exclusiveMinimum: false
-    maximum: 65544
+    maximum: 65536
     exclusiveMaximum: false
 responses:
   'trait:standardErrors:404':

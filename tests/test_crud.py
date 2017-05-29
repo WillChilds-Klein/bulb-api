@@ -8,12 +8,7 @@ from datetime import datetime
 from bulb_api.models import BulbModel
 
 
-# TODO: MAKE EACH TYPE OF ACCESS ITS OWN CLASS!!
-# - can then parameterize by class
-# - can then have class-wide fixture usage
-# - create generators that create valid entity examples at will
-# - create DDB fixture, and pre-populated it!
-# - parameterize all this shnit over ALL entity types
+# TODO: create generators that create valid entity examples at will
 
 
 @pytest.fixture(scope='function', params=BulbModel.__subclasses__())
@@ -108,7 +103,7 @@ class TestCreateEntity:
         path = self.get_create_url_path(model)
         res = client.post(path, data=json.dumps(entity),
                                 content_type='application/json')
-        # assert res.status_code == 201
+        assert res.status_code == 201
         res = client.post(path, data=json.dumps(entity),
                                 content_type='application/json')
         # assert res.status_code == 409
@@ -157,7 +152,7 @@ class TestCreateEntity:
 # | READ |
 # +------+
 @pytest.mark.usefixtures('prepop_db')
-class TestGetEntity:
+class TestReadEntity:
     @staticmethod
     def get_get_url_path(model_class, e_id):
         return ''.join(['/', model_class.__name__.lower(), 's', '/', e_id])
@@ -196,6 +191,45 @@ class TestGetEntity:
             for attr in entity.keys():
                 assert type(res_entity[attr]) == type(entity[attr])
                 assert res_entity[attr] == entity[attr]
+
+    def test_list_entity_paginated(self, client, model, entities, entity_ids):
+        path = self.get_list_url_path(model)
+        q_strs = {'offset': 0, 'limit': 1}
+        res = client.get(path, query_string=q_strs)
+        assert res.status_code == 200
+        res_entities = json.loads(res.data)
+        assert type(res_entities) == list
+        assert len(res_entities) == 1
+        q_strs = {'offset': 1, 'limit': 1}
+        res = client.get(path, query_string=q_strs)
+        assert res.status_code == 200
+        res_entities = json.loads(res.data)
+        assert type(res_entities) == list
+        assert len(res_entities) == 1
+        q_strs = {'offset': 0, 'limit': 2}
+        res = client.get(path, query_string=q_strs)
+        assert res.status_code == 200
+        res_entities = json.loads(res.data)
+        assert type(res_entities) == list
+        assert len(res_entities) == 2
+
+    def test_list_entity_bad_params(self, client, model, entities, entity_ids):
+        path = self.get_list_url_path(model)
+        q_strs = {'limit': 65536+1}
+        res = client.get(path, query_string=q_strs)
+        assert res.status_code == 400
+        q_strs = {'limit': 0}
+        res = client.get(path, query_string=q_strs)
+        assert res.status_code == 400
+        q_strs = {'limit': -1}
+        res = client.get(path, query_string=q_strs)
+        assert res.status_code == 400
+        q_strs = {'offset': -1}
+        res = client.get(path, query_string=q_strs)
+        assert res.status_code == 400
+        q_strs = {'offset': len(entities)+1}
+        res = client.get(path, query_string=q_strs)
+        assert res.status_code == 400
 
 
 # +--------+
