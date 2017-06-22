@@ -10,7 +10,68 @@ consumes:
   - application/json
 produces:
   - application/json
+securityDefinitions:
+  oauth2:
+    type: oauth2
+    flow: implicit
+    scopes:
+      uid: uid
+    authorizationUrl: 'http://localhost:9090/auth'
 paths:
+  /auth:
+    get:
+      operationId: bulb_api.auth.validate_token
+      summary: Validate Token
+      tags:
+        - Authentication
+      description: |-
+        This endpoint is used by connexion's OAuth2 support to validate a Bearer token passed in under the `Authorization` header to the API.
+
+        Returns `200` for a valid token and `401` for an invalid one.
+      parameters:
+        - name: access_token
+          in: query
+          description: Bearer token vended by POST to `/auth`.
+          required: true
+          type: string
+      responses:
+        default:
+          description: ''
+          schema: {}
+    post:
+      operationId: bulb_api.auth.new_token
+      summary: New Token
+      tags:
+        - Authentication
+      parameters:
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              email:
+                type: string
+                format: email
+              password:
+                type: string
+                minLength: 8
+                maxLength: 64
+            required:
+              - email
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: object
+            properties:
+              access_token:
+                type: string
+            required:
+              - access_token
+        '401':
+          description: ''
+        '404':
+          description: ''
   '/documents/{doc_id}':
     parameters:
       - name: doc_id
@@ -27,6 +88,9 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/document-output'
+      security:
+        - oauth2:
+            - uid
     put:
       operationId: bulb_api.handlers.update_document
       summary: Update Document
@@ -42,6 +106,9 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/document-output'
+      security:
+        - oauth2:
+            - uid
     delete:
       operationId: bulb_api.handlers.delete_document
       summary: Delete Document
@@ -50,6 +117,9 @@ paths:
       responses:
         '204':
           description: ''
+      security:
+        - oauth2:
+            - uid
   /documents:
     get:
       operationId: bulb_api.handlers.list_documents
@@ -57,8 +127,8 @@ paths:
       tags:
         - Documents
       parameters:
-        - $ref: '#/parameters/trait:paged:offset'
-        - $ref: '#/parameters/trait:paged:limit'
+        - $ref: '#/parameters/trait:paginated:offset'
+        - $ref: '#/parameters/trait:paginated:limit'
       responses:
         '200':
           description: ''
@@ -66,6 +136,9 @@ paths:
             type: array
             items:
               $ref: '#/definitions/document-output'
+      security:
+        - oauth2:
+            - uid
     post:
       operationId: bulb_api.handlers.create_document
       summary: Create Document
@@ -81,6 +154,9 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/document-output'
+      security:
+        - oauth2:
+            - uid
   '/organizations/{org_id}':
     parameters:
       - name: org_id
@@ -97,6 +173,9 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/organization-output'
+      security:
+        - oauth2:
+            - uid
     put:
       operationId: bulb_api.handlers.update_organization
       summary: Update Organization
@@ -112,6 +191,9 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/organization-output'
+      security:
+        - oauth2:
+            - uid
     delete:
       operationId: bulb_api.handlers.delete_organization
       summary: Delete Organization
@@ -120,6 +202,9 @@ paths:
       responses:
         '204':
           description: ''
+      security:
+        - oauth2:
+            - uid
   /organizations:
     get:
       operationId: bulb_api.handlers.list_organizations
@@ -127,8 +212,8 @@ paths:
       tags:
         - Organizations
       parameters:
-        - $ref: '#/parameters/trait:paged:offset'
-        - $ref: '#/parameters/trait:paged:limit'
+        - $ref: '#/parameters/trait:paginated:offset'
+        - $ref: '#/parameters/trait:paginated:limit'
       responses:
         '200':
           description: ''
@@ -136,6 +221,9 @@ paths:
             type: array
             items:
               $ref: '#/definitions/organization-output'
+      security:
+        - oauth2:
+            - uid
     post:
       operationId: bulb_api.handlers.create_organization
       summary: Create Organization
@@ -151,6 +239,9 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/organization-output'
+      security:
+        - oauth2:
+            - uid
   '/resources/{res_id}':
     parameters:
       - name: res_id
@@ -167,6 +258,9 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/resource-output'
+      security:
+        - oauth2:
+            - uid
     put:
       operationId: bulb_api.handlers.update_resource
       summary: Update Resource
@@ -182,6 +276,9 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/resource-output'
+      security:
+        - oauth2:
+            - uid
     delete:
       operationId: bulb_api.handlers.delete_resource
       summary: Delete Resource
@@ -190,6 +287,9 @@ paths:
       responses:
         '204':
           description: ''
+      security:
+        - oauth2:
+            - uid
   /resources:
     get:
       operationId: bulb_api.handlers.list_resources
@@ -197,8 +297,8 @@ paths:
       tags:
         - Resources
       parameters:
-        - $ref: '#/parameters/trait:paged:offset'
-        - $ref: '#/parameters/trait:paged:limit'
+        - $ref: '#/parameters/trait:paginated:offset'
+        - $ref: '#/parameters/trait:paginated:limit'
       responses:
         '200':
           description: ''
@@ -206,6 +306,9 @@ paths:
             type: array
             items:
               $ref: '#/definitions/resource-output'
+      security:
+        - oauth2:
+            - uid
     post:
       operationId: bulb_api.handlers.create_resource
       summary: Create Resource
@@ -221,6 +324,9 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/resource-output'
+      security:
+        - oauth2:
+            - uid
   '/users/{user_id}':
     parameters:
       - name: user_id
@@ -237,6 +343,9 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/user-output'
+      security:
+        - oauth2:
+            - uid
     put:
       operationId: bulb_api.handlers.update_user
       summary: Update User
@@ -252,6 +361,9 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/user-output'
+      security:
+        - oauth2:
+            - uid
     delete:
       operationId: bulb_api.handlers.delete_user
       summary: Delete User
@@ -260,6 +372,9 @@ paths:
       responses:
         '204':
           description: ''
+      security:
+        - oauth2:
+            - uid
   /users:
     get:
       operationId: bulb_api.handlers.list_users
@@ -267,8 +382,8 @@ paths:
       tags:
         - Users
       parameters:
-        - $ref: '#/parameters/trait:paged:offset'
-        - $ref: '#/parameters/trait:paged:limit'
+        - $ref: '#/parameters/trait:paginated:offset'
+        - $ref: '#/parameters/trait:paginated:limit'
       responses:
         '200':
           description: ''
@@ -276,6 +391,9 @@ paths:
             type: array
             items:
               $ref: '#/definitions/user-output'
+      security:
+        - oauth2:
+            - uid
     post:
       operationId: bulb_api.handlers.create_user
       summary: Create User
@@ -292,22 +410,22 @@ paths:
           schema:
             $ref: '#/definitions/user-output'
 parameters:
-  'trait:paged:offset':
+  'trait:paginated:offset':
     name: offset
     in: query
     description: Offset from which to start list of returned values.
     type: integer
     default: 0
     minimum: 0
-  'trait:paged:limit':
+  'trait:paginated:limit':
     name: limit
     in: query
-    description: 'Maximum number of items to return. This should be an integer on the interval [1,65536].'
+    description: 'Maximum number of items to return. This should be an integer on the interval [1,500].'
     type: integer
     default: 10
     minimum: 1
     exclusiveMinimum: false
-    maximum: 65536
+    maximum: 500
     exclusiveMaximum: false
 responses:
   'trait:standardErrors:404':
@@ -664,6 +782,8 @@ definitions:
       name:
         type: string
         pattern: '^[A-Za-z-_ ]+'
+      password:
+        type: string
     example:
       user_id: 4c1fb4fe-b4f0-4b90-bb1d-e36c8cac9ef0
       create_datetime: '2967-10-01T11:33:21Z'

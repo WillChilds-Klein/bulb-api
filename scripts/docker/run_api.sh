@@ -4,6 +4,7 @@ usage() {
     local exit_code=${1:-"0"}
     echo "Usage: $0 [-d] [-i IMAGE] [-n NAME] [-p PORT] IMAGE [ARGS ...]" 1>&2
     if [ $exit_code = "0" ]; then
+    echo "  --auth-port localhost port for token validation"
     echo "  -d          detach container from std{out,in}"
     echo "  -h          print this message and exit"
     echo "  -i IMAGE    which image/container to run"
@@ -23,10 +24,15 @@ IMAGE="lambda"
 LINK="ddb_local"
 NAME="bulb_api"
 PORT=8080
+AUTH_PORT=9090
 PROD=
 VERBOSE=
 while [[ $# -gt 0 ]]; do
     case "$1" in
+        --auth-port)
+            AUTH_PORT=$2
+            shift
+            ;;
         -d|--detach)
             DETACH=1
             ;;
@@ -72,7 +78,7 @@ fi
 set -e
 
 docker run --rm \
-           $([[ -n $DETACH ]] && echo -n '-d ') \
+           $([[ -n $DETACH ]] && echo -n '-d ' || echo -n '-it') \
            $([[ -n $LINK ]] && echo -n "--link $LINK") \
            --name "$NAME" \
            -p ${PORT}:${PORT} \
@@ -81,6 +87,7 @@ docker run --rm \
            -e AWS_SECRET_ACCESS_KEY="$(aws configure get aws_secret_access_key)" \
            -e AWS_DEFAULT_REGION="$(aws configure get region)" \
            -e PYTHONDONTWRITEBYTECODE=1 \
+           -e TOKENINFO_URL="http://localhost:${AUTH_PORT}/auth" \
            $([[ -z $PROD ]] && echo -n '-e FLASK_DEBUG=1') \
     ${IMAGE} \
     $@

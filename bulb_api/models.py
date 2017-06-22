@@ -9,6 +9,7 @@ from pynamodb.attributes import (
         UTCDateTimeAttribute
 )
 from pynamodb.exceptions import GetError
+from pynamodb.indexes import GlobalSecondaryIndex, AllProjection
 from pynamodb.models import Model
 
 
@@ -101,19 +102,36 @@ class Resource(BulbModel):
     s3_thumbnail_uri = UnicodeAttribute(null=True)
 
 
+class EmailIndex(GlobalSecondaryIndex):
+    """ TODO
+    """
+    class Meta():
+        index_name = 'email-index'
+        read_capacity_units = 1
+        write_capacity_units = 1
+        projection = AllProjection()
+
+    email = UnicodeAttribute(hash_key=True)
+
+
 class User(BulbModel):
     """
     LSI might be good here over GSI, but at the moment, we haven't a need for a
     range_key, a hard requisite for LSI's. So, we'll go with a GSI indexed on
     email. Should consider moving to LSI when have range key, as it doesn't
-    require additional thpt provisioning like GSI's do.
+    require additional thpt provisioning like GSI's do. Perhaps a good range
+    key would be organization id! See TODO below about changing the
+    `organizations` field to be a single `organization` attribute of type
+    UnicodeAttribute().
     """
     class Meta(BulbModel.Meta):
-        # TODO index this shnit by email
         table_name = 'User'
 
     user_id = UnicodeAttribute(hash_key=True)
     email = UnicodeAttribute()
+    password_hash = UnicodeAttribute()
     create_datetime = UTCDateTimeAttribute()
-    organizations = ListAttribute()
+    organizations = ListAttribute()     # TODO <-- change this to single string
     name = UnicodeAttribute()
+
+    email_index = EmailIndex()

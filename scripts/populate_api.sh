@@ -46,7 +46,7 @@ do_post() {
 
 do_list() {
     local endpoint="$1"
-    http --check-status GET "$BASE_URL/$(basename $endpoint)"
+    http --check-status GET "$BASE_URL/$(basename $endpoint)" 'Authorization: Bearer master_key'
 }
 
 # populate documents
@@ -65,9 +65,9 @@ do_post /resources '{"name": "MA SBA", "s3_thumbnail_uri": "https://yourmom.s3.a
                      "url": "http://www.sba.gov", "mailto_uri": "mailto:govt_drone_69@sba.gov"}'
 
 # populate users
-do_post /users '{"name": "harold", "email": "harry@balls.com", "organizations": ["1"]}'
-do_post /users '{"name": "gino", "email": "gino@greasypizza.com", "organizations": ["2"]}'
-do_post /users '{"name": "gina", "email": "gina@greasypizza.com", "organizations": ["2"]}'
+do_post /users '{"name": "harold", "email": "harry@balls.com", "password": "password", "organizations": ["1"]}'
+do_post /users '{"name": "gino", "email": "gino@greasypizza.com", "password": "password", "organizations": ["2"]}'
+do_post /users '{"name": "gina", "email": "gina@greasypizza.com", "password": "password", "organizations": ["2"]}'
 
 
 # now do a quick test to make sure we're returning the proper values

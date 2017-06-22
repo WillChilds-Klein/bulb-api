@@ -7,6 +7,9 @@
         "route53_enabled": true,
         "certificate_arn": "arn:aws:acm:us-east-1:724943322837:certificate/b7e475aa-3765-435b-a87f-19aa5be7d843",
         "timeout_seconds": 60,
+        "environment_variables": {
+            "TOKENINFO_URL": "http://localhost:9090/auth"
+        },
         "log_level": "DEBUG"
     }
 }

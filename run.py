@@ -25,7 +25,7 @@ def prod(port):
 @click.option('--debug/--no-debug', default=True, help='run in debug mode')
 @click.option('--port', '-p', default=8080, help='port to serve on')
 def local(debug, port):
-    app.run(port=port, host='localhost')
+    app.run(host='localhost', port=port, debug=debug)
 
 
 @click.group(invoke_without_command=True)

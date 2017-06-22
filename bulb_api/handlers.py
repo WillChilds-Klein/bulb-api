@@ -1,10 +1,9 @@
 from connexion import NoContent
 from datetime import datetime
 
+from .auth import hash_password, assert_valid_password
+from .config import HIDDEN_ATTRIBUTES
 from .models import BulbModel, Document, Organization, Resource, User
-
-
-DATETIME_FMT = '%Y-%m-%dT%H:%M:%SZ'
 
 
 def get_organization(org_id):
@@ -52,7 +51,15 @@ def get_user(user_id):
 
 
 def update_user(body, user_id):
-    return update_entity(User, user_id, body)
+    try:
+        password = body.pop('password')     # get passwd and delete from dict.
+        assert_valid_password(password)
+        body['password_hash'] = hash_password(password)
+    except KeyError:                        # key 'password' not in body
+        pass
+    except AssertionError:                  # passwd validity assertion failed
+        return 'Invalid password!', 400
+    return update_entity(User, body)
 
 
 def delete_user(user_id):
@@ -64,6 +71,15 @@ def list_users(offset=0, limit=10):
 
 
 def create_user(body):
+    # TODO: perhaps move this logic and analog in update_user to User model?
+    try:
+        password = body.pop('password')     # get passwd and delete from dict.
+        assert_valid_password(password)
+    except KeyError:                        # user didn't specify a password.
+        return 'Please specify a password in the body!', 400
+    except AssertionError:                  # user specified invalid password.
+        return 'Invalid password!', 400
+    body['password_hash'] = hash_password(password)
     return create_entity(User, body)
 
 
@@ -87,6 +103,11 @@ def create_resource(body):
     return create_entity(Resource, body)
 
 
+def clean_response(body):
+    return dict([(k, v) for (k, v) in body.iteritems()
+                                 if k not in HIDDEN_ATTRIBUTES])
+
+
 def create_entity(model, body):
     if not issubclass(model, BulbModel):
         raise Exception('`model` must be subclass of BulbModel!')
@@ -99,29 +120,38 @@ def create_entity(model, body):
         entity.save()
     except ValueError as e:
         return e.message, 400
-    return entity.to_dict(), 201
+    return clean_response(entity.to_dict()), 201
 
 
 def get_entity(model, entity_id):
     if not issubclass(model, BulbModel):
         raise Exception('`model` must be subclass of BulbModel!')
     try:
-        return model.get(entity_id).to_dict(), 200
+        entity = model.get(entity_id).to_dict()
     except model.DoesNotExist:
         return NoContent, 404
+    return clean_response(entity), 200
 
 
 def list_entity(model, offset, limit):
     if not issubclass(model, BulbModel):
         raise Exception('`model` must be subclass of BulbModel!')
-    # TODO: this is beyond unscalable... :(
+    # TODO: this is pretty unscalable... :(
+    # b/c pynamo represents index/models query/scan results as iterators, we're
+    # going to have to manually iterate over the totality of that iterator
+    # until we get to the appropriate offset, then start aggregating the return
+    # list. see:
+    # https://stackoverflow.com/questions/39671167/index-into-a-python-iterator
+    # https://github.com/pynamodb/PynamoDB/pull/48
     entities = [entity.to_dict() for entity in model.scan()]
-    if offset >= len(entities):
+    if offset > len(entities):  # TODO add test case where offset == len...
         return 'Offset larger than number of available entities!', 400
-    return entities[offset:][:limit], 200
+    cleaned_entities = [clean_response(d) for d in entities[offset:][:limit]]
+    return cleaned_entities, 200
 
 
 def update_entity(model, entity_id, body):
+    # TODO make decorator for custom input validation?
     if not issubclass(model, BulbModel):
         raise Exception('`model` must be subclass of BulbModel!')
     if model().get_hash_key_name() in body.keys():
@@ -131,8 +161,11 @@ def update_entity(model, entity_id, body):
     except model.DoesNotExist:
         return NoContent, 404
     entity.update_from_dict(body)
-    entity.save()
-    return entity.to_dict(), 200
+    try:
+        entity.save()
+    except ValueError as e:
+        return e.message, 400
+    return clean_response(entity.to_dict()), 200
 
 
 def delete_entity(model, entity_id):
