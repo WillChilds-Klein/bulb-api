@@ -131,7 +131,7 @@ class User(BulbModel):
     email = UnicodeAttribute()
     password_hash = UnicodeAttribute()
     create_datetime = UTCDateTimeAttribute()
-    organizations = ListAttribute()     # TODO <-- change this to single string
+    organizations = ListAttribute(null=True)    # TODO change to single string
     name = UnicodeAttribute()
 
     email_index = EmailIndex()

@@ -40,13 +40,15 @@ BASE_URL=${1:-"http://localhost:8080"}
 do_post() {
     local endpoint="$1"
     local json="$2"
-    echo $json | \
-        http --check-status POST "$BASE_URL/$(basename $endpoint)"
+    echo $json \
+    | http --check-status POST "$BASE_URL/$(basename $endpoint)" \
+        'Authorization: Bearer master_key'
 }
 
 do_list() {
     local endpoint="$1"
-    http --check-status GET "$BASE_URL/$(basename $endpoint)" 'Authorization: Bearer master_key'
+    http --check-status GET "$BASE_URL/$(basename $endpoint)" \
+        'Authorization: Bearer master_key'
 }
 
 # populate documents

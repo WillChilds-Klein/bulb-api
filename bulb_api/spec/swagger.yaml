@@ -823,7 +823,6 @@ definitions:
       - user_id
       - create_datetime
       - email
-      - organizations
       - name
     example:
       user_id: 4c1fb4fe-b4f0-4b90-bb1d-e36c8cac9ef0
