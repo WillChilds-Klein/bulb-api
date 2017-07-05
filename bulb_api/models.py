@@ -55,10 +55,10 @@ class BulbModel(Model):
         """ Updates the entity with the values provided in dict `body`. """
         for key, value in body.items():
             if key == self.get_hash_key_name():
-                raise Exception('can\'t overwrite hash key!')
+                raise Exception('can\'t overwrite hash key `{}`!'.format(key))
             elif key not in self.attribute_values.keys() \
                     and key not in self._attributes.keys():
-                raise Exception('key must be a valid attribute!')
+                raise Exception('key `{}` must be a valid attr!'.format(key))
             else:
                 setattr(self, key, value)
 
@@ -119,10 +119,7 @@ class User(BulbModel):
     LSI might be good here over GSI, but at the moment, we haven't a need for a
     range_key, a hard requisite for LSI's. So, we'll go with a GSI indexed on
     email. Should consider moving to LSI when have range key, as it doesn't
-    require additional thpt provisioning like GSI's do. Perhaps a good range
-    key would be organization id! See TODO below about changing the
-    `organizations` field to be a single `organization` attribute of type
-    UnicodeAttribute().
+    require additional thpt provisioning like GSI's do.
     """
     class Meta(BulbModel.Meta):
         table_name = 'User'
@@ -131,7 +128,7 @@ class User(BulbModel):
     email = UnicodeAttribute()
     password_hash = UnicodeAttribute()
     create_datetime = UTCDateTimeAttribute()
-    organizations = ListAttribute(null=True)    # TODO change to single string
+    organization = UnicodeAttribute()
     name = UnicodeAttribute()
 
     email_index = EmailIndex()

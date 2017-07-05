@@ -18,7 +18,7 @@ def delete_organization(org_id):
     return delete_entity(Organization, org_id)
 
 
-def list_organizations(offset=0, limit=10):
+def list_organizations(offset=0, limit=None):
     return list_entity(Organization, offset, limit)
 
 
@@ -38,7 +38,7 @@ def delete_document(doc_id):
     return delete_entity(Document, doc_id)
 
 
-def list_documents(offset=0, limit=10):
+def list_documents(offset=0, limit=None):
     return list_entity(Document, offset, limit)
 
 
@@ -66,7 +66,7 @@ def delete_user(user_id):
     return delete_entity(User, user_id)
 
 
-def list_users(offset=0, limit=10):
+def list_users(offset=0, limit=None):
     return list_entity(User, offset, limit)
 
 
@@ -80,6 +80,7 @@ def create_user(body):
     except AssertionError:                  # user specified invalid password.
         return 'Invalid password!', 400
     body['password_hash'] = hash_password(password)
+    body['organization'] = Organization.get_unused_uuid()  # 1:1 user -> org
     return create_entity(User, body)
 
 
@@ -95,7 +96,7 @@ def delete_resource(res_id):
     return delete_entity(Resource, res_id)
 
 
-def list_resources(offset=0, limit=10):
+def list_resources(offset=0, limit=None):
     return list_entity(Resource, offset, limit)
 
 
@@ -113,7 +114,7 @@ def create_entity(model, body):
         raise Exception('`model` must be subclass of BulbModel!')
     if model().get_hash_key_name() in body.keys():
         return 'Cannot specify hash_key in POST body!', 400
-    entity = model(model.get_unused_uuid())
+    entity = model(hash_key=model.get_unused_uuid())
     entity.update_from_dict(body)
     entity.create_datetime = datetime.utcnow()
     try:
@@ -146,6 +147,10 @@ def list_entity(model, offset, limit):
     entities = [entity.to_dict() for entity in model.scan()]
     if offset > len(entities):  # TODO add test case where offset == len...
         return 'Offset larger than number of available entities!', 400
+    try:
+        offset, limit = (int(offset), int(limit) if limit else None)
+    except ValueError:  # TODO: add CRUD test case around this.
+        return 'Offset and limit must be integers!'
     cleaned_entities = [clean_response(d) for d in entities[offset:][:limit]]
     return cleaned_entities, 200
 

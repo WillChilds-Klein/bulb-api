@@ -67,9 +67,9 @@ do_post /resources '{"name": "MA SBA", "s3_thumbnail_uri": "https://yourmom.s3.a
                      "url": "http://www.sba.gov", "mailto_uri": "mailto:govt_drone_69@sba.gov"}'
 
 # populate users
-do_post /users '{"name": "harold", "email": "harry@balls.com", "password": "password", "organizations": ["1"]}'
-do_post /users '{"name": "gino", "email": "gino@greasypizza.com", "password": "password", "organizations": ["2"]}'
-do_post /users '{"name": "gina", "email": "gina@greasypizza.com", "password": "password", "organizations": ["2"]}'
+do_post /users '{"name": "harold", "email": "harry@balls.com", "password": "password"}'
+do_post /users '{"name": "gino", "email": "gino@greasypizza.com", "password": "password"}'
+do_post /users '{"name": "gina", "email": "gina@greasypizza.com", "password": "password"}'
 
 
 # now do a quick test to make sure we're returning the proper values

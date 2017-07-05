@@ -420,13 +420,10 @@ parameters:
   'trait:paginated:limit':
     name: limit
     in: query
-    description: 'Maximum number of items to return. This should be an integer on the interval [1,500].'
-    type: integer
-    default: 10
-    minimum: 1
-    exclusiveMinimum: false
+    description: 'Maximum number of items to return. This should be an integer on the interval [0,500]. This parameter''s absence indicates no limit.'
+    type: number
+    minimum: 0
     maximum: 500
-    exclusiveMaximum: false
 responses:
   'trait:standardErrors:404':
     description: ''
@@ -770,15 +767,10 @@ definitions:
       email:
         type: string
         format: email
-      organizations:
-        type: array
-        description: a list of organizations (by id) that the user is a member of.
-        uniqueItems: true
-        minItems: 1
-        maxItems: 10
-        items:
-          type: string
-          format: uuid
+      organization:
+        type: string
+        description: uuid of organization that the user is a member of.
+        format: uuid
       name:
         type: string
         pattern: '^[A-Za-z-_ ]+'
@@ -788,8 +780,7 @@ definitions:
       user_id: 4c1fb4fe-b4f0-4b90-bb1d-e36c8cac9ef0
       create_datetime: '2967-10-01T11:33:21Z'
       email: bob@bobsburgers.com
-      organizations:
-        - c0d803db-8ab2-429c-bfa1-b17afdd18b5d
+      organization: c0d803db-8ab2-429c-bfa1-b17afdd18b5d
       name: bob
   user-readonly:
     title: User ReadOnly
@@ -807,15 +798,10 @@ definitions:
       email:
         type: string
         format: email
-      organizations:
-        type: array
-        description: a list of organizations (by id) that the user is a member of.
-        uniqueItems: true
-        minItems: 1
-        maxItems: 10
-        items:
-          type: string
-          format: uuid
+      organization:
+        type: string
+        description: UUID of organization that the user is a member of.
+        format: uuid
       name:
         type: string
         pattern: '^[A-Za-z-_ ]+'
@@ -823,13 +809,13 @@ definitions:
       - user_id
       - create_datetime
       - email
+      - organization
       - name
     example:
       user_id: 4c1fb4fe-b4f0-4b90-bb1d-e36c8cac9ef0
       create_datetime: '2967-10-01T11:33:21Z'
       email: bob@bobsburgers.com
-      organizations:
-        - c0d803db-8ab2-429c-bfa1-b17afdd18b5d
+      organization: c0d803db-8ab2-429c-bfa1-b17afdd18b5d
       name: bob
   user-input:
     title: User Input
