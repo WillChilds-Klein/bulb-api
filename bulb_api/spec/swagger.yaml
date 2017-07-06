@@ -18,6 +18,91 @@ securityDefinitions:
       uid: uid
     authorizationUrl: 'http://localhost:9090/auth'
 paths:
+  '/tasks/{id}':
+    parameters:
+      - name: id
+        in: path
+        required: true
+        type: string
+    get:
+      operationId: bulb_api.handlers.get_task
+      summary: Get Task
+      tags:
+        - Tasks
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/task-output'
+      security:
+        - oauth2:
+            - uid
+    put:
+      operationId: bulb_api.handlers.update_task
+      summary: Update Task
+      tags:
+        - Tasks
+      parameters:
+        - name: body
+          in: body
+          schema:
+            $ref: '#/definitions/task-input'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/task-output'
+      security:
+        - oauth2:
+            - uid
+    delete:
+      operationId: bulb_api.handlers.delete_task
+      summary: Delete Task
+      tags:
+        - Tasks
+      responses:
+        '204':
+          description: ''
+      security:
+        - oauth2:
+            - uid
+  /tasks:
+    get:
+      operationId: bulb_api.handlers.list_tasks
+      summary: List Tasks
+      tags:
+        - Tasks
+      parameters:
+        - $ref: '#/parameters/trait:paginated:offset'
+        - $ref: '#/parameters/trait:paginated:limit'
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/task-output'
+      security:
+        - oauth2:
+            - uid
+    post:
+      operationId: bulb_api.handlers.create_task
+      summary: Create Task
+      tags:
+        - Tasks
+      parameters:
+        - name: body
+          in: body
+          schema:
+            $ref: '#/definitions/task-input'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/task-output'
+      security:
+        - oauth2:
+            - uid
   /auth:
     get:
       operationId: bulb_api.auth.validate_token
@@ -575,25 +660,6 @@ definitions:
       name: state tax filing 2017
       type: FORM
       note: this is our master document for tax season '17. pilfering washington politicians...
-  entity:
-    title: Entity
-    type: object
-    description: 'This object represents an abstract bulb Entity, which can represent any of the primary endpoint Models.'
-    properties:
-      entity_id:
-        type: string
-        format: uuid
-        description: The UUID of the entity in its respective domain.
-      type:
-        type: string
-        enum:
-          - USER
-          - ORGANIZATION
-          - DOCUMENT
-          - RESOURCE
-    example:
-      entity_id: f754c40d-e6cd-4d58-aaf5-2a487f421498
-      type: USER
   organization:
     title: Organization
     type: object
@@ -751,6 +817,144 @@ definitions:
       url: 'https://www.mdchamber.org/'
       s3_thumbnail_uri: 'https://bulb-resources.s3.amazonaws.com/MD_Chamber_of_Commerce.png'
       mailto_uri: 'mailto:jpalmeri@mdchamber.org'
+  task:
+    title: Task
+    type: object
+    description: ''
+    properties:
+      org_id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        description: The task's display name.a
+      priority:
+        type: number
+        minimum: 0
+        exclusiveMinimum: false
+        maximum: 1
+        description: 'Task''s priority, expressed on the interval [0,1]. i.e., x | x ∈ R, x ∈ [0,1].'
+      status:
+        type: string
+        enum:
+          - NOT_STARTED
+          - IN_PROGRESS
+          - COMPLETE
+        description: The completion status of the task.
+      workspaces:
+        type: array
+        description: 'Which workspace '
+        uniqueItems: true
+        items:
+          type: string
+          enum:
+            - FORMATION
+            - TAX
+            - COMPLIANCE
+            - FINANCE
+            - REAL_ESTATE
+            - STRUCTURAL
+            - INVENTORY
+            - EQUIPMENT
+            - OPERATIONS
+            - EMPLOYEES
+            - INSURANCE
+            - MARKETING
+      url:
+        type: string
+        description: The URL of our static/informational resource associated with the task.
+        format: uri
+      create_datetime:
+        type: string
+        description: datetime string representing document creation time.
+        format: date-time
+      task_id:
+        type: string
+        format: uuid
+        description: The task's unique ID.
+    example:
+      task_id: 46ebb76f-0dc9-4448-8db4-8b20a0a253fb
+      org_id: 46ebb76f-0dc9-4448-8db4-8b20a0a253fb
+      name: Create Business Plan
+      priority: 0
+      status: NOT_STARTED
+      workspaces:
+        - FORMATION
+      url: 'https://static.bulb.co/formation/business_plan'
+      create_datetime: '4886-08-13T12:30:15.427Z'
+  task-readonly:
+    title: Task ReadOnly
+    type: object
+    description: ''
+    properties:
+      org_id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        description: The task's display name.a
+      priority:
+        type: number
+        minimum: 0
+        exclusiveMinimum: false
+        maximum: 1
+        description: 'Task''s priority, expressed on the interval [0,1]. i.e., x | x ∈ R, x ∈ [0,1].'
+      status:
+        type: string
+        enum:
+          - NOT_STARTED
+          - IN_PROGRESS
+          - COMPLETE
+        description: The completion status of the task.
+      workspaces:
+        type: array
+        description: 'Which workspace '
+        uniqueItems: true
+        items:
+          type: string
+          enum:
+            - FORMATION
+            - TAX
+            - COMPLIANCE
+            - FINANCE
+            - REAL_ESTATE
+            - STRUCTURAL
+            - INVENTORY
+            - EQUIPMENT
+            - OPERATIONS
+            - EMPLOYEES
+            - INSURANCE
+            - MARKETING
+      url:
+        type: string
+        description: The URL of our static/informational resource associated with the task.
+        format: uri
+      create_datetime:
+        type: string
+        description: datetime string representing document creation time.
+        format: date-time
+      task_id:
+        type: string
+        format: uuid
+        description: The task's unique ID.
+    required:
+      - org_id
+      - name
+      - priority
+      - status
+      - workspaces
+      - create_datetime
+      - task_id
+    example:
+      task_id: 46ebb76f-0dc9-4448-8db4-8b20a0a253fb
+      org_id: 46ebb76f-0dc9-4448-8db4-8b20a0a253fb
+      name: Create Business Plan
+      priority: 0
+      status: NOT_STARTED
+      workspaces:
+        - FORMATION
+      url: 'https://static.bulb.co/formation/business_plan'
+      create_datetime: '4886-08-13T12:30:15.427Z'
   user:
     title: User
     type: object
@@ -849,3 +1053,11 @@ definitions:
     allOf:
       - $ref: '#/definitions/resource-readonly'
       - $ref: '#/definitions/resource-input'
+  task-input:
+    title: Task Input
+    $ref: '#/definitions/task'
+  task-output:
+    title: Task Output
+    allOf:
+      - $ref: '#/definitions/task-readonly'
+      - $ref: '#/definitions/task-input'

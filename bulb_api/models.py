@@ -13,6 +13,30 @@ from pynamodb.indexes import GlobalSecondaryIndex, AllProjection
 from pynamodb.models import Model
 
 
+class EmailIndex(GlobalSecondaryIndex):
+    """ TODO
+    """
+    class Meta():
+        index_name = 'email-index'
+        read_capacity_units = 1
+        write_capacity_units = 1
+        projection = AllProjection()
+
+    email = UnicodeAttribute(hash_key=True)
+
+
+class OrgIndex(GlobalSecondaryIndex):
+    """ TODO
+    """
+    class Meta():
+        index_name = 'org-index'
+        read_capacity_units = 1
+        write_capacity_units = 1
+        projection = AllProjection()
+
+    org_id = UnicodeAttribute(hash_key=True)
+
+
 class BulbModel(Model):
     # def __repr__(self):   # TODO
     # TODO: make this an abstract class
@@ -102,18 +126,6 @@ class Resource(BulbModel):
     s3_thumbnail_uri = UnicodeAttribute(null=True)
 
 
-class EmailIndex(GlobalSecondaryIndex):
-    """ TODO
-    """
-    class Meta():
-        index_name = 'email-index'
-        read_capacity_units = 1
-        write_capacity_units = 1
-        projection = AllProjection()
-
-    email = UnicodeAttribute(hash_key=True)
-
-
 class User(BulbModel):
     """
     LSI might be good here over GSI, but at the moment, we haven't a need for a
@@ -128,7 +140,23 @@ class User(BulbModel):
     email = UnicodeAttribute()
     password_hash = UnicodeAttribute()
     create_datetime = UTCDateTimeAttribute()
-    organization = UnicodeAttribute()
+    organization = UnicodeAttribute()   # TODO: change this to "org_id"
     name = UnicodeAttribute()
 
     email_index = EmailIndex()
+
+
+class Task(BulbModel):
+    class Meta(BulbModel.Meta):
+        table_name = 'Task'
+
+    task_id = UnicodeAttribute(hash_key=True)
+    org_id = UnicodeAttribute()
+    create_datetime = UTCDateTimeAttribute()
+    name = UnicodeAttribute()
+    url = UnicodeAttribute(null=True)
+    workspaces = ListAttribute()
+    priority = NumberAttribute()
+    status = UnicodeAttribute()
+
+    org_index = OrgIndex()

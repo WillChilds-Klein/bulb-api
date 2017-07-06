@@ -12,6 +12,7 @@ from bulb_api.models import (
     Organization,
     Resource,
     User,
+    Task,
 )
 
 
@@ -62,7 +63,7 @@ def client():
 def fresh_db():
     # NOTE: assumes ddb is running locally on port 8000
     # TODO: implement this to be independent of pynamodb?
-    models = [Document, Organization, Resource, User]
+    models = [Document, Organization, Resource, User, Task]
     for model in models:
         if model.exists():
             model.delete_table()

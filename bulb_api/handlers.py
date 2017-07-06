@@ -3,7 +3,8 @@ from datetime import datetime
 
 from .auth import hash_password, assert_valid_password
 from .config import HIDDEN_ATTRIBUTES
-from .models import BulbModel, Document, Organization, Resource, User
+from .default_tasks import DEFAULT_TASKS
+from .models import BulbModel, Document, Organization, Resource, User, Task
 
 
 def get_organization(org_id):
@@ -81,6 +82,9 @@ def create_user(body):
         return 'Invalid password!', 400
     body['password_hash'] = hash_password(password)
     body['organization'] = Organization.get_unused_uuid()  # 1:1 user -> org
+    for task_body in DEFAULT_TASKS:
+        task_body['org_id'] = body['organization']
+        create_task(task_body)
     return create_entity(User, body)
 
 
@@ -102,6 +106,26 @@ def list_resources(offset=0, limit=None):
 
 def create_resource(body):
     return create_entity(Resource, body)
+
+
+def get_task(res_id):
+    return get_entity(Task, res_id)
+
+
+def update_task(body, res_id):
+    return update_entity(Task, res_id, body)
+
+
+def delete_task(res_id):
+    return delete_entity(Task, res_id)
+
+
+def list_tasks(offset=0, limit=None):
+    return list_entity(Task, offset, limit)
+
+
+def create_task(body):
+    return create_entity(Task, body)
 
 
 def clean_response(body):

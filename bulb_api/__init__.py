@@ -4,7 +4,7 @@ import threading
 
 from flask_cors import CORS
 
-from .models import Document, Organization, Resource, User
+from .models import Document, Organization, Resource, User, Task
 
 
 def create_app():
@@ -23,7 +23,7 @@ def create_app():
 
     # TODO: move this to some init_app function so this isn't being called on
     #       startup every time.
-    for model in Document, Organization, Resource, User:
+    for model in Document, Organization, Resource, User, Task:
         if not model.exists():
             model.create_table()
 
