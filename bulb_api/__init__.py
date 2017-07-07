@@ -30,10 +30,11 @@ def create_app():
     return app
 
 
-def start_auth_thread():
+def start_auth_thread(port=None):
     auth_app = create_app()
     auth_app.debug = False
-    kwargs = {'host': 'localhost', 'port': auth_app.config['AUTH_PORT']}
+    kwargs = {'host': 'localhost',
+              'port': port if port else auth_app.config['AUTH_PORT']}
     auth_thread = threading.Thread(target=auth_app.run, kwargs=kwargs)
     auth_thread.daemon = True   # needed to ensure automatic cleanup on exit.
     auth_thread.start()

@@ -4,6 +4,7 @@ from datetime import datetime
 from .auth import hash_password, assert_valid_password
 from .config import HIDDEN_ATTRIBUTES
 from .default_tasks import DEFAULT_TASKS
+from .exceptions import BulbException
 from .models import BulbModel, Document, Organization, Resource, User, Task
 
 
@@ -60,7 +61,7 @@ def update_user(body, user_id):
         pass
     except AssertionError:                  # passwd validity assertion failed
         return 'Invalid password!', 400
-    return update_entity(User, body)
+    return update_entity(User, user_id, body)
 
 
 def delete_user(user_id):
@@ -71,7 +72,7 @@ def list_users(offset=0, limit=None):
     return list_entity(User, offset, limit)
 
 
-def create_user(body):
+def create_user(body, user_id=None):
     # TODO: perhaps move this logic and analog in update_user to User model?
     try:
         password = body.pop('password')     # get passwd and delete from dict.
@@ -81,11 +82,11 @@ def create_user(body):
     except AssertionError:                  # user specified invalid password.
         return 'Invalid password!', 400
     body['password_hash'] = hash_password(password)
-    body['organization'] = Organization.get_unused_uuid()  # 1:1 user -> org
+    body['org_id'] = Organization.get_unused_uuid()  # 1:1 user -> org
     for task_body in DEFAULT_TASKS:
-        task_body['org_id'] = body['organization']
+        task_body['org_id'] = body['org_id']
         create_task(task_body)
-    return create_entity(User, body)
+    return create_entity(User, body, entity_id=user_id)
 
 
 def get_resource(res_id):
@@ -108,16 +109,16 @@ def create_resource(body):
     return create_entity(Resource, body)
 
 
-def get_task(res_id):
-    return get_entity(Task, res_id)
+def get_task(task_id):
+    return get_entity(Task, task_id)
 
 
-def update_task(body, res_id):
-    return update_entity(Task, res_id, body)
+def update_task(body, task_id):
+    return update_entity(Task, task_id, body)
 
 
-def delete_task(res_id):
-    return delete_entity(Task, res_id)
+def delete_task(task_id):
+    return delete_entity(Task, task_id)
 
 
 def list_tasks(offset=0, limit=None):
@@ -133,14 +134,18 @@ def clean_response(body):
                                  if k not in HIDDEN_ATTRIBUTES])
 
 
-def create_entity(model, body):
+def create_entity(model, body, entity_id=None):
     if not issubclass(model, BulbModel):
-        raise Exception('`model` must be subclass of BulbModel!')
+        raise BulbException('`model` must be subclass of BulbModel!')
     if model().get_hash_key_name() in body.keys():
         return 'Cannot specify hash_key in POST body!', 400
-    entity = model(hash_key=model.get_unused_uuid())
-    entity.update_from_dict(body)
+    entity = model(hash_key=entity_id if entity_id
+                                      else model.get_unused_uuid())
     entity.create_datetime = datetime.utcnow()
+    try:
+        entity.update_from_dict(body)
+    except BulbException as e:
+        return e.message, 400
     try:
         entity.save()
     except ValueError as e:
@@ -150,7 +155,7 @@ def create_entity(model, body):
 
 def get_entity(model, entity_id):
     if not issubclass(model, BulbModel):
-        raise Exception('`model` must be subclass of BulbModel!')
+        raise BulbException('`model` must be subclass of BulbModel!')
     try:
         entity = model.get(entity_id).to_dict()
     except model.DoesNotExist:
@@ -160,7 +165,7 @@ def get_entity(model, entity_id):
 
 def list_entity(model, offset, limit):
     if not issubclass(model, BulbModel):
-        raise Exception('`model` must be subclass of BulbModel!')
+        raise BulbException('`model` must be subclass of BulbModel!')
     # TODO: this is pretty unscalable... :(
     # b/c pynamo represents index/models query/scan results as iterators, we're
     # going to have to manually iterate over the totality of that iterator
@@ -172,7 +177,7 @@ def list_entity(model, offset, limit):
     if offset > len(entities):  # TODO add test case where offset == len...
         return 'Offset larger than number of available entities!', 400
     try:
-        offset, limit = (int(offset), int(limit) if limit else None)
+        offset, limit = (int(offset), None if limit is None else int(limit))
     except ValueError:  # TODO: add CRUD test case around this.
         return 'Offset and limit must be integers!'
     cleaned_entities = [clean_response(d) for d in entities[offset:][:limit]]
@@ -182,14 +187,17 @@ def list_entity(model, offset, limit):
 def update_entity(model, entity_id, body):
     # TODO make decorator for custom input validation?
     if not issubclass(model, BulbModel):
-        raise Exception('`model` must be subclass of BulbModel!')
+        raise BulbException('`model` must be subclass of BulbModel!')
     if model().get_hash_key_name() in body.keys():
         return 'Cannot specify hash_key in PUT body!', 400
     try:
         entity = model.get(entity_id)
     except model.DoesNotExist:
         return NoContent, 404
-    entity.update_from_dict(body)
+    try:
+        entity.update_from_dict(body)
+    except BulbException as e:
+        return e.message, 400
     try:
         entity.save()
     except ValueError as e:
@@ -199,7 +207,7 @@ def update_entity(model, entity_id, body):
 
 def delete_entity(model, entity_id):
     if not issubclass(model, BulbModel):
-        raise Exception('`model` must be subclass of BulbModel!')
+        raise BulbException('`model` must be subclass of BulbModel!')
     try:
         model.get(entity_id).delete()
     except model.DoesNotExist:

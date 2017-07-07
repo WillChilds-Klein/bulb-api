@@ -54,8 +54,8 @@ do_list() {
 # TODO: modify this script to use test data JSON files...
 
 # populate documents
-do_post /documents '{"name": "taxes", "organization": "1", "uri": "https://bulb-documents.s3.amazonaws.com/this_documents_uuid", "status": "IN_PROGRESS"}'
-do_post /documents '{"name": "wages", "organization": "2", "uri": "https://bulb-documents.s3.amazonaws.com/this_documents_uuid", "status": "NOT_STARTED"}'
+do_post /documents '{"name": "taxes", "org_id": "1", "uri": "https://bulb-documents.s3.amazonaws.com/this_documents_uuid", "status": "IN_PROGRESS"}'
+do_post /documents '{"name": "wages", "org_id": "2", "uri": "https://bulb-documents.s3.amazonaws.com/this_documents_uuid", "status": "NOT_STARTED"}'
 
 # populate organizations
 do_post /organizations '{"name": "mass chicken", "users": ["1"], "type": "BUYER"}'

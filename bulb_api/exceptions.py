@@ -1,0 +1,2 @@
+class BulbException(Exception):
+    pass

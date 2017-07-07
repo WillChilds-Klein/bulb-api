@@ -2,23 +2,23 @@
     {
         "name": "mass chicken",
         "users": [
-            "1"
+            "1ebab64a-6285-11e7-8444-fb932de3584d"
         ],
         "type": "BUYER"
     },
     {
         "name": "ginos pizza",
         "users": [
-            "2",
-            "3"
+            "1ebab64a-6285-11e7-8444-fb932de3584d",
+            "17e42fd6-6285-11e7-a41a-bf0b91e875ec"
         ],
         "type": "BUYER"
     },
     {
         "name": "local foods ltd.",
         "users": [
-            "8",
-            "9"
+            "58327714-6285-11e7-b16d-bb33520b6d4e",
+            "61cab214-6285-11e7-925a-078e4902464e"
         ],
         "type": "VENDOR"
     }

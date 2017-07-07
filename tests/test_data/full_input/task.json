@@ -4,6 +4,7 @@
         "org_id": "c51d7bd8-61ce-11e7-9210-ebdb9a35a3dc",
         "priority": 0,
         "status": "NOT_STARTED",
+        "url": "https://static.bulb.co/formation/business_plan",
         "workspaces": [
             "FORMATION"
         ]
@@ -13,6 +14,7 @@
         "org_id": "c51d7bd8-61ce-11e7-9210-ebdb9a35a3dc",
         "priority": 0.82,
         "status": "NOT_STARTED",
+        "url": "https://bulb.co/tax/filing_taxes",
         "workspaces": [
             "TAX"
         ]

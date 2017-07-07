@@ -1,13 +1,13 @@
 [
     {
         "name": "taxes",
-        "organization": "1",
+        "org_id": "1ebab64a-6285-11e7-8444-fb932de3584d",
         "uri": "https://bulb-documents.s3.amazonaws.com/this_documents_uuid",
         "status": "IN_PROGRESS"
     },
     {
         "name": "wages",
-        "organization": "2",
+        "org_id": "1ebab64a-6285-11e7-8444-fb932de3584d",
         "uri": "https://bulb-documents.s3.amazonaws.com/this_documents_uuid",
         "status": "NOT_STARTED"
     }

@@ -18,9 +18,63 @@ securityDefinitions:
       uid: uid
     authorizationUrl: 'http://localhost:9090/auth'
 paths:
-  '/tasks/{id}':
+  /auth:
+    get:
+      operationId: bulb_api.auth.validate_token
+      summary: Validate Token
+      tags:
+        - Authentication
+      description: |-
+        This endpoint is used by connexion's OAuth2 support to validate a Bearer token passed in under the `Authorization` header to the API.
+
+        Returns `200` for a valid token and `401` for an invalid one.
+      parameters:
+        - name: access_token
+          in: query
+          description: Bearer token vended by POST to `/auth`.
+          required: true
+          type: string
+      responses:
+        default:
+          description: ''
+          schema: {}
+    post:
+      operationId: bulb_api.auth.new_token
+      summary: New Token
+      tags:
+        - Authentication
+      parameters:
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              email:
+                type: string
+                format: email
+              password:
+                type: string
+                minLength: 8
+                maxLength: 64
+            required:
+              - email
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: object
+            properties:
+              access_token:
+                type: string
+            required:
+              - access_token
+        '401':
+          description: ''
+        '404':
+          description: ''
+  '/tasks/{task_id}':
     parameters:
-      - name: id
+      - name: task_id
         in: path
         required: true
         type: string
@@ -103,60 +157,6 @@ paths:
       security:
         - oauth2:
             - uid
-  /auth:
-    get:
-      operationId: bulb_api.auth.validate_token
-      summary: Validate Token
-      tags:
-        - Authentication
-      description: |-
-        This endpoint is used by connexion's OAuth2 support to validate a Bearer token passed in under the `Authorization` header to the API.
-
-        Returns `200` for a valid token and `401` for an invalid one.
-      parameters:
-        - name: access_token
-          in: query
-          description: Bearer token vended by POST to `/auth`.
-          required: true
-          type: string
-      responses:
-        default:
-          description: ''
-          schema: {}
-    post:
-      operationId: bulb_api.auth.new_token
-      summary: New Token
-      tags:
-        - Authentication
-      parameters:
-        - name: body
-          in: body
-          schema:
-            type: object
-            properties:
-              email:
-                type: string
-                format: email
-              password:
-                type: string
-                minLength: 8
-                maxLength: 64
-            required:
-              - email
-      responses:
-        '200':
-          description: ''
-          schema:
-            type: object
-            properties:
-              access_token:
-                type: string
-            required:
-              - access_token
-        '401':
-          description: ''
-        '404':
-          description: ''
   '/documents/{doc_id}':
     parameters:
       - name: doc_id
@@ -540,7 +540,7 @@ definitions:
         type: string
         format: date-time
         description: datetime string representing document creation time.
-      organization:
+      org_id:
         type: string
         format: uuid
         description: UUID of Organization with which the Document is associated.
@@ -582,7 +582,7 @@ definitions:
     example:
       doc_id: 476b329e-feb6-4237-a3ca-7844b1d0b598
       create_datetime: '2016-07-11T12:16:06Z'
-      organization: 0e8eadfa-c8c6-4eae-a256-f9093b85662d
+      org_id: 0e8eadfa-c8c6-4eae-a256-f9093b85662d
       uri: 'https://bulb-documents.s3.amazonaws.com/410741ff-e2f1-4b42-a4de-84cd91129371'
       due_date: '2017-04-26T22:21:23Z'
       progress: 0.33
@@ -603,7 +603,7 @@ definitions:
         type: string
         format: date-time
         description: datetime string representing document creation time.
-      organization:
+      org_id:
         type: string
         format: uuid
         description: UUID of Organization with which the Document is associated.
@@ -645,14 +645,14 @@ definitions:
     required:
       - doc_id
       - create_datetime
-      - organization
+      - org_id
       - uri
       - status
       - name
     example:
       doc_id: 476b329e-feb6-4237-a3ca-7844b1d0b598
       create_datetime: '2016-07-11T12:16:06Z'
-      organization: 0e8eadfa-c8c6-4eae-a256-f9093b85662d
+      org_id: 0e8eadfa-c8c6-4eae-a256-f9093b85662d
       uri: 'https://bulb-documents.s3.amazonaws.com/410741ff-e2f1-4b42-a4de-84cd91129371'
       due_date: '2017-04-26T22:21:23Z'
       progress: 0.33
@@ -971,7 +971,7 @@ definitions:
       email:
         type: string
         format: email
-      organization:
+      org_id:
         type: string
         description: uuid of organization that the user is a member of.
         format: uuid
@@ -984,7 +984,7 @@ definitions:
       user_id: 4c1fb4fe-b4f0-4b90-bb1d-e36c8cac9ef0
       create_datetime: '2967-10-01T11:33:21Z'
       email: bob@bobsburgers.com
-      organization: c0d803db-8ab2-429c-bfa1-b17afdd18b5d
+      org_id: c0d803db-8ab2-429c-bfa1-b17afdd18b5d
       name: bob
   user-readonly:
     title: User ReadOnly
@@ -1002,7 +1002,7 @@ definitions:
       email:
         type: string
         format: email
-      organization:
+      org_id:
         type: string
         description: UUID of organization that the user is a member of.
         format: uuid
@@ -1013,13 +1013,13 @@ definitions:
       - user_id
       - create_datetime
       - email
-      - organization
+      - org_id
       - name
     example:
       user_id: 4c1fb4fe-b4f0-4b90-bb1d-e36c8cac9ef0
       create_datetime: '2967-10-01T11:33:21Z'
       email: bob@bobsburgers.com
-      organization: c0d803db-8ab2-429c-bfa1-b17afdd18b5d
+      org_id: c0d803db-8ab2-429c-bfa1-b17afdd18b5d
       name: bob
   user-input:
     title: User Input

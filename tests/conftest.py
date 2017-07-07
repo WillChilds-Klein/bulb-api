@@ -1,6 +1,8 @@
 import json
 import logging
+import os
 import pytest
+import time
 
 from datetime import datetime
 from connexion import App
@@ -52,11 +54,27 @@ def pytest_namespace():
     return CONSTANTS
 
 
+# TODO: move all this shit to a test config...
 @pytest.fixture(scope='module')
 def client():
-    cxn_app = App(__name__, port=8081, specification_dir=SPEC_DIR, debug=True)
+    from bulb_api import start_auth_thread
+    start_auth_thread(port=8081)
+    os.environ['TOKENINFO_URL'] = 'http://localhost:8081/auth'
+    class AuthenticatedTestClientWrapper(object):
+        """ Inspired by this S/O post: http://bit.ly/2tnhCeY
+        """
+        def __init__(self, app):
+            self.app = app
+        def __call__(self, environ, start_response):
+            environ['HTTP_AUTHORIZATION'] = 'Bearer master_key'
+            return self.app(environ, start_response)
+    cxn_app = App(__name__, port=8082, specification_dir=SPEC_DIR)
     cxn_app.add_api('swagger.yaml', validate_responses=True)
-    return cxn_app.app.test_client(use_cookies=False)
+                                    # strict_validation=True)
+    cxn_app.app.wsgi_app = AuthenticatedTestClientWrapper(cxn_app.app.wsgi_app)
+    cxn_app.app.testing = True
+    with cxn_app.app.test_client(use_cookies=False) as client:
+        yield client
 
 
 @pytest.fixture(scope='function')

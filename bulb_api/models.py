@@ -12,6 +12,8 @@ from pynamodb.exceptions import GetError
 from pynamodb.indexes import GlobalSecondaryIndex, AllProjection
 from pynamodb.models import Model
 
+from .exceptions import BulbException
+
 
 class EmailIndex(GlobalSecondaryIndex):
     """ TODO
@@ -70,7 +72,7 @@ class BulbModel(Model):
                 return candidate
         else:
             msg = 'Can\'t find unique UUID after {} tries!'.format(max_tries)
-            raise Exception(msg)
+            raise BulbException(msg)
 
     def to_dict(self):
         return dict(self.attribute_values)
@@ -79,10 +81,10 @@ class BulbModel(Model):
         """ Updates the entity with the values provided in dict `body`. """
         for key, value in body.items():
             if key == self.get_hash_key_name():
-                raise Exception('can\'t overwrite hash key `{}`!'.format(key))
+                raise BulbException('can\'t overwrite hash key `{}`!'.format(key))
             elif key not in self.attribute_values.keys() \
                     and key not in self._attributes.keys():
-                raise Exception('key `{}` must be a valid attr!'.format(key))
+                raise BulbException('key `{}` must be valid attr!'.format(key))
             else:
                 setattr(self, key, value)
 
@@ -93,7 +95,7 @@ class Document(BulbModel):
 
     doc_id = UnicodeAttribute(hash_key=True)
     create_datetime = UTCDateTimeAttribute()
-    organization = UnicodeAttribute()
+    org_id = UnicodeAttribute()
     uri = UnicodeAttribute()
     due_date = UTCDateTimeAttribute(null=True)
     progress = NumberAttribute(null=True)
@@ -140,7 +142,7 @@ class User(BulbModel):
     email = UnicodeAttribute()
     password_hash = UnicodeAttribute()
     create_datetime = UTCDateTimeAttribute()
-    organization = UnicodeAttribute()   # TODO: change this to "org_id"
+    org_id = UnicodeAttribute()   # TODO: change this to "org_id"
     name = UnicodeAttribute()
 
     email_index = EmailIndex()

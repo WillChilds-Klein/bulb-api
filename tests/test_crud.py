@@ -5,7 +5,8 @@ import uuid
 
 from datetime import datetime
 
-from bulb_api.models import BulbModel
+from bulb_api.config import HIDDEN_ATTRIBUTES
+from bulb_api.models import BulbModel, User
 
 
 # TODO: create generators that create valid entity examples at will
@@ -29,16 +30,22 @@ def entity_ids(entities):
 @pytest.fixture(scope='function')
 def prepop_db(fresh_db, model, entities, entity_ids):
     for entity, entity_id in zip(entities, entity_ids):
-        entity_item = model(entity_id)
-        entity_item.update_from_dict(entity)
-        entity_item.create_datetime = datetime.utcnow()
-        entity_item.save()
+        if model is User:
+            from bulb_api.handlers import create_user
+            # make copies of entity/entity_id to avoid mutative side effects.
+            _ , st = create_user(dict(entity), user_id=str(entity_id))
+            assert st == 201
+        else:
+            entity_item = model(entity_id)
+            entity_item.update_from_dict(entity)
+            entity_item.create_datetime = datetime.utcnow()
+            entity_item.save()
 
 
 def get_id_name_from_model(model):
     assert issubclass(model, BulbModel)
     id_name = model.__name__.lower()    # TODO: change '*_id' to 'id'!!
-    if not id_name == 'user':
+    if id_name not in ['user', 'task']:
         id_name = model.__name__.lower()[:3]
     id_name += '_id'
     return id_name
@@ -124,7 +131,8 @@ class TestCreateEntity:
         res = client.get('/'.join([path, entity_id]))
         assert res.status_code == 200
         res_data = json.loads(res.data)
-        for attr in entity.keys():
+        attrs = filter(lambda a: a not in HIDDEN_ATTRIBUTES, entity.keys())
+        for attr in attrs:
             assert res_data[attr]
             assert res_data[attr] == entity[attr]
 
@@ -163,12 +171,14 @@ class TestReadEntity:
 
     def test_get_entity_ok(self, client, model, entities, entity_ids):
         for entity, entity_id in zip(entities, entity_ids):
+            print entity
             path = self.get_get_url_path(model, entity_id)
             res = client.get(path)
             assert res.status_code == 200
             res_entity = json.loads(res.data)
             assert res_entity[model().get_hash_key_name()] == entity_id
-            for attr in entity.keys():
+            attrs = filter(lambda a: a not in HIDDEN_ATTRIBUTES, entity.keys())
+            for attr in attrs:
                 assert type(res_entity[attr]) == type(entity[attr])
                 assert res_entity[attr] == entity[attr]
 
@@ -188,11 +198,12 @@ class TestReadEntity:
         all_the_things = zip(res_entities, entities, entity_ids)
         for res_entity, entity, entity_id in all_the_things:
             assert res_entity[model().get_hash_key_name()] == entity_id
-            for attr in entity.keys():
+            attrs = filter(lambda a: a not in HIDDEN_ATTRIBUTES, entity.keys())
+            for attr in attrs:
                 assert type(res_entity[attr]) == type(entity[attr])
                 assert res_entity[attr] == entity[attr]
 
-    def test_list_entity_paginated(self, client, model, entities, entity_ids):
+    def test_list_entity_paginated(self, client, model):
         path = self.get_list_url_path(model)
         q_strs = {'offset': 0, 'limit': 1}
         res = client.get(path, query_string=q_strs)
@@ -212,13 +223,16 @@ class TestReadEntity:
         res_entities = json.loads(res.data)
         assert type(res_entities) == list
         assert len(res_entities) == 2
+        q_strs = {'limit': 0}   # 0 is valid limit, should return [].
+        res = client.get(path, query_string=q_strs)
+        assert res.status_code == 200
+        res_entities = json.loads(res.data)
+        assert type(res_entities) == list
+        assert len(res_entities) == 0
 
-    def test_list_entity_bad_params(self, client, model, entities, entity_ids):
+    def test_list_entity_paginated_bad_params(self, client, model, entities):
         path = self.get_list_url_path(model)
         q_strs = {'limit': 65536+1}
-        res = client.get(path, query_string=q_strs)
-        assert res.status_code == 400
-        q_strs = {'limit': 0}
         res = client.get(path, query_string=q_strs)
         assert res.status_code == 400
         q_strs = {'limit': -1}
@@ -251,8 +265,9 @@ class TestUpdateEntity:
             assert res.status_code == 200
             expected[attr] = val
             updated = json.loads(res.data)
-            for key in expected.keys():
-                assert expected[key] == updated[key]
+            attrs = filter(lambda a: a not in HIDDEN_ATTRIBUTES, expected.keys())
+            for attr in attrs:
+                assert expected[attr] == updated[attr]
 
     def test_update_entity_not_found(self, client, model):
         bad_id = str(uuid.uuid4())
@@ -274,7 +289,8 @@ class TestUpdateEntity:
                                           entity_ids):
         entity, entity_id = entities[0], entity_ids[0]
         path = self.get_update_url_path(model, entity_id)
-        for attr in entity.keys():
+        attrs = filter(lambda a: a not in HIDDEN_ATTRIBUTES, entity.keys())
+        for attr in attrs:
             fresh_body = dict(entity)
             fresh_body[attr] = None     # test data shouldn't have any nullables
             res = client.put(path, data=json.dumps(fresh_body),
@@ -283,6 +299,8 @@ class TestUpdateEntity:
 
     def test_update_entity_read_back(self):
         # TODO
+        # use this:
+        #   attrs = filter(lambda a: a not in HIDDEN_ATTRIBUTES, entity.keys())
         pass
 
     def test_update_entity_id_in_body(self, client, model, entity_ids):
