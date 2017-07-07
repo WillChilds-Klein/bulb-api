@@ -1,0 +1,24 @@
+machine:
+  environment:
+    _JAVA_OPTIONS: "-Xms512m -Xmx1024m"
+    TOKENINFO_URL: "http://localhost:9090/auth"
+    FLASK_DEBUG: 1
+    DDB_PORT: 8000
+  java:
+    version: openjdk7
+  post:
+    - curl -k -L -o dynamodb-local.tgz http://dynamodb-local.s3-website-us-west-2.amazonaws.com/dynamodb_local_latest.tar.gz
+    - tar -xzf dynamodb-local.tgz
+    - java -Djava.library.path=./DynamoDBLocal_lib -jar DynamoDBLocal.jar -sharedDb -inMemory -port $DDB_PORT:
+        background: true
+    - for i in {1..20}; do nc -vz localhost $DDB_PORT &>/dev/null && break; sleep 1; done
+
+test:
+  pre:
+    - mkdir $CIRCLE_TEST_REPORTS/pytest
+  override:
+    - pytest --cov-report=html --cov=bulb_api --cov-branch --junitxml=$CIRCLE_TEST_REPORTS/pytest/junit_report.xml
+
+general:
+    artifacts:
+      -  "htmlcov/"
