@@ -135,6 +135,11 @@ def clean_response(body):
 
 
 def create_entity(model, body, entity_id=None):
+    """ A generic function for creating a bulb Entity.
+
+    NOTE: entity_id should be used for testing ONLY. In normal operation, we
+    generate and assign the entity_id here.
+    """
     if not issubclass(model, BulbModel):
         raise BulbException('`model` must be subclass of BulbModel!')
     if model().get_hash_key_name() in body.keys():

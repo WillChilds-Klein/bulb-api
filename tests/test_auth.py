@@ -1,0 +1,185 @@
+import json
+import jwt
+import pytest
+import uuid
+
+from datetime import datetime, timedelta
+
+from bulb_api.models import User
+from bulb_api.config import TOKEN_SECRET_KEY
+
+# TODO: move to either a.) prepop_db or b.) other consolidated fixture
+
+
+def test_login_ok(unauthed_client, fresh_db, dummy_entities):
+    client = unauthed_client
+    fresh_user = dummy_entities[User][0]
+    res = client.post('/users', data=json.dumps(fresh_user))
+    assert res.status_code == 201
+    res = client.post('/auth', data=json.dumps({
+        'email': fresh_user['email'],
+        'password': fresh_user['password'],
+    }))
+    assert res.status_code == 200
+    access_token = json.loads(res.data)['access_token']
+    try:
+        payload = jwt.decode(access_token, TOKEN_SECRET_KEY)
+        uid = payload['uid']
+    except:
+        pytest.fail('failed decoding access_token JWT!')
+    try:
+        uuid.UUID(uid, version=4)
+    except ValueError:
+        pytest.fail('access_token\'s uid claim is not valid UUID!')
+    # TODO: assert token iat claim > now
+    # TODO: assert token exp claim > now
+
+
+def test_login_bad_email(unauthed_client, fresh_db, dummy_entities):
+    client = unauthed_client
+    fresh_user = dummy_entities[User][0]
+    res = client.post('/auth', data=json.dumps({
+        'email': 'clearly_not_an_email',
+        'password': fresh_user['password'],
+    }))
+    assert res.status_code == 400
+    res = client.post('/auth', data=json.dumps({
+        'password': fresh_user['password'],
+    }))
+    assert res.status_code == 400
+
+
+def test_login_nonexistent_email(unauthed_client, fresh_db, dummy_entities):
+    client = unauthed_client
+    fresh_user = dummy_entities[User][0]
+    res = client.post('/auth', data=json.dumps({
+        'email': fresh_user['email'],
+        'password': fresh_user['password'],
+    }))
+    assert res.status_code == 404
+
+
+def test_login_bad_password(unauthed_client, fresh_db, dummy_entities):
+    client = unauthed_client
+    fresh_user = dummy_entities[User][0]
+    res = client.post('/users', data=json.dumps(fresh_user))
+    assert res.status_code == 201
+    res = client.post('/auth', data=json.dumps({
+        'email': fresh_user['email'],
+        'password': 'not_a_valid_password',
+    }))
+    assert res.status_code == 401
+    res = client.post('/auth', data=json.dumps({
+        'email': fresh_user['email'],
+    }))
+    assert res.status_code == 400
+
+
+def test_auth_ok(unauthed_client, fresh_db, dummy_entities):
+    client = unauthed_client
+    fresh_user = dummy_entities[User][0]
+    res = client.post('/users', data=json.dumps(fresh_user))
+    assert res.status_code == 201
+    res = client.post('/auth', data=json.dumps({
+        'email': fresh_user['email'],
+        'password': fresh_user['password'],
+    }))
+    assert res.status_code == 200
+    access_token = json.loads(res.data)['access_token']
+    auth_hdr = {'Authorization': 'Bearer {}'.format(access_token)}
+    res = client.get('/tasks', headers=auth_hdr)
+    assert res.status_code == 200
+
+
+def test_testing_auth_token(unauthed_client, fresh_db):
+    client = unauthed_client
+    testing_token_header = {'Authorization': 'Bearer master_key'}
+    res = client.get('/tasks', headers=testing_token_header)
+    assert res.status_code == 200
+
+
+def test_hidden_auth_get(unauthed_client):
+    client = unauthed_client
+    query_string = {'access_token': 'Bearer 12345678910'}
+    base_url = 'http://foo.example.com'
+    res = client.get('/auth', query_string=query_string, base_url=base_url)
+    assert res.status_code == 404
+    res = client.get('/auth', base_url=base_url)
+    assert res.status_code == 400
+
+
+def test_auth_expired_token(unauthed_client, fresh_db, dummy_entities):
+    client = unauthed_client
+    fresh_user = dummy_entities[User][0]
+    res = client.post('/users', data=json.dumps(fresh_user))
+    assert res.status_code == 201
+    res = client.post('/auth', data=json.dumps({
+        'email': fresh_user['email'],
+        'password': fresh_user['password'],
+    }))
+    assert res.status_code == 200
+    access_token = json.loads(res.data)['access_token']
+    jwt_dict = jwt.decode(access_token, TOKEN_SECRET_KEY)
+    jwt_dict['exp'] = datetime.utcnow() - timedelta(seconds=1)
+    exp_access_token = jwt.encode(jwt_dict, TOKEN_SECRET_KEY)
+    auth_hdr = {'Authorization': 'Bearer {}'.format(exp_access_token)}
+    res = client.get('/tasks', headers=auth_hdr)
+    assert res.status_code == 401
+
+
+def test_auth_bad_token_signature(unauthed_client, fresh_db, dummy_entities):
+    client = unauthed_client
+    fresh_user = dummy_entities[User][0]
+    res = client.post('/users', data=json.dumps(fresh_user))
+    assert res.status_code == 201
+    res = client.post('/auth', data=json.dumps({
+        'email': fresh_user['email'],
+        'password': fresh_user['password'],
+    }))
+    assert res.status_code == 200
+    access_token = json.loads(res.data)['access_token']
+    hdr, payload, sig = access_token.split('.')
+    sig = sig[:(len(sig)/3)] + 'x'*(len(sig)/3) + sig[(2*len(sig)/3):]
+    bad_access_token = '.'.join([hdr, payload, sig])
+    auth_hdr = {'Authorization': 'Bearer {}'.format(bad_access_token)}
+    res = client.get('/tasks', headers=auth_hdr)
+    assert res.status_code == 401
+
+
+def test_auth_bad_token_no_uid(unauthed_client, fresh_db, dummy_entities):
+    client = unauthed_client
+    fresh_user = dummy_entities[User][0]
+    res = client.post('/users', data=json.dumps(fresh_user))
+    assert res.status_code == 201
+    res = client.post('/auth', data=json.dumps({
+        'email': fresh_user['email'],
+        'password': fresh_user['password'],
+    }))
+    assert res.status_code == 200
+    access_token = json.loads(res.data)['access_token']
+    jwt_dict = jwt.decode(access_token, TOKEN_SECRET_KEY)
+    del jwt_dict['uid']
+    bad_access_token = jwt.encode(jwt_dict, TOKEN_SECRET_KEY)
+    auth_hdr = {'Authorization': 'Bearer {}'.format(bad_access_token)}
+    res = client.get('/tasks', headers=auth_hdr)
+    assert res.status_code == 401
+
+
+def test_func_new_token():
+    """ TODO """
+    pass
+
+
+def test_func_validate_token():
+    """ TODO """
+    pass
+
+
+def test_func_hash_password():
+    """ TODO """
+    pass
+
+
+def test_func_assert_valid_password():
+    """ TODO """
+    pass

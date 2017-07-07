@@ -45,7 +45,7 @@ def new_token(body):
         email, password = body['email'], body['password']
         user = User.email_index.query(email, limit=1).next()
     except KeyError:                        # no email or password.
-        return NoContent, 401
+        return NoContent, 400
     except (ValueError, StopIteration):     # index query returned no results.
         return NoContent, 404
     if not check_password_hash(user.password_hash, password):
@@ -72,7 +72,7 @@ def validate_token(access_token):
     except jwt.ExpiredSignatureError:
         return 'Token has expired!', 401
     except KeyError:
-        return NoContent, 400
+        return NoContent, 401   # bad token but well-formed req, so 401 not 400
     return {'uid': uid, 'scope': ['uid']}, 200
 
 

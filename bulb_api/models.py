@@ -66,9 +66,7 @@ class BulbModel(Model):
                 cls.get(candidate)
                 print '{}: ID {} already in use!'.format(cls.Meta.table_name,
                                                         candidate)
-            except cls.DoesNotExist:
-                return candidate
-            except GetError:
+            except (cls.DoesNotExist, GetError):
                 return candidate
         else:
             msg = 'Can\'t find unique UUID after {} tries!'.format(max_tries)
@@ -81,10 +79,10 @@ class BulbModel(Model):
         """ Updates the entity with the values provided in dict `body`. """
         for key, value in body.items():
             if key == self.get_hash_key_name():
-                raise BulbException('can\'t overwrite hash key `{}`!'.format(key))
+                raise BulbException('cant overwrite hash key `{}`'.format(key))
             elif key not in self.attribute_values.keys() \
                     and key not in self._attributes.keys():
-                raise BulbException('key `{}` must be valid attr!'.format(key))
+                raise BulbException('key `{}` must be valid attr'.format(key))
             else:
                 setattr(self, key, value)
 
@@ -142,7 +140,7 @@ class User(BulbModel):
     email = UnicodeAttribute()
     password_hash = UnicodeAttribute()
     create_datetime = UTCDateTimeAttribute()
-    org_id = UnicodeAttribute()   # TODO: change this to "org_id"
+    org_id = UnicodeAttribute()     # TODO: change this to "org_id"
     name = UnicodeAttribute()
 
     email_index = EmailIndex()

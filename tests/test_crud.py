@@ -12,36 +12,6 @@ from bulb_api.models import BulbModel, User
 # TODO: create generators that create valid entity examples at will
 
 
-@pytest.fixture(scope='function', params=BulbModel.__subclasses__())
-def model(request):
-    return request.param
-
-
-@pytest.fixture(scope='function')
-def entities(model, dummy_entities):
-    return sorted([dict(entity) for entity in dummy_entities[model]])
-
-
-@pytest.fixture(scope='function')
-def entity_ids(entities):
-    return [str(uuid.uuid4()) for _ in entities]
-
-
-@pytest.fixture(scope='function')
-def prepop_db(fresh_db, model, entities, entity_ids):
-    for entity, entity_id in zip(entities, entity_ids):
-        if model is User:
-            from bulb_api.handlers import create_user
-            # make copies of entity/entity_id to avoid mutative side effects.
-            _ , st = create_user(dict(entity), user_id=str(entity_id))
-            assert st == 201
-        else:
-            entity_item = model(entity_id)
-            entity_item.update_from_dict(entity)
-            entity_item.create_datetime = datetime.utcnow()
-            entity_item.save()
-
-
 def get_id_name_from_model(model):
     assert issubclass(model, BulbModel)
     id_name = model.__name__.lower()    # TODO: change '*_id' to 'id'!!
@@ -74,8 +44,7 @@ class TestCreateEntity:
 
     def test_create_entity_ok(self, client, model, entity):
         path = self.get_create_url_path(model)
-        res = client.post(path, data=json.dumps(entity),
-                                content_type='application/json')
+        res = client.post(path, data=json.dumps(entity))
         assert res.status_code == 201
         # TODO: validate returned body against `entity`
 
@@ -84,16 +53,14 @@ class TestCreateEntity:
             bad_entity = dict(entity)   # make copy to fuck around with
             del bad_entity[attr]        # fuck around with it
             path = self.get_create_url_path(model)
-            res = client.post(path, data=json.dumps(bad_entity),
-                                    content_type='application/json')
+            res = client.post(path, data=json.dumps(bad_entity))
             assert res.status_code == 400
 
     def test_create_entity_extra_attrs(self, client, model, entity):
         bad_entity = dict(entity)
         bad_entity['foo'] = 'yourmom'
         path = self.get_create_url_path(model)
-        res = client.post(path, data=json.dumps(bad_entity),
-                                content_type='application/json')
+        res = client.post(path, data=json.dumps(bad_entity))
         assert res.status_code == 400
 
     def test_create_entity_bad_attr_types(self, client, model, entity):
@@ -101,24 +68,20 @@ class TestCreateEntity:
             bad_entity = dict(entity)
             bad_entity[attr] = None   # test data shouldn't have any nullables
             path = self.get_create_url_path(model)
-            res = client.post(path, data=json.dumps(bad_entity),
-                                    content_type='application/json')
+            res = client.post(path, data=json.dumps(bad_entity))
             assert res.status_code == 400
 
     def test_create_entity_already_exists(self, client, model, entity):
         # TODO: implement this safety check in the actual code
         path = self.get_create_url_path(model)
-        res = client.post(path, data=json.dumps(entity),
-                                content_type='application/json')
+        res = client.post(path, data=json.dumps(entity))
         assert res.status_code == 201
-        res = client.post(path, data=json.dumps(entity),
-                                content_type='application/json')
+        res = client.post(path, data=json.dumps(entity))
         # assert res.status_code == 409
 
     def test_create_entity_read_back(self, client, model, entity):
         path = self.get_create_url_path(model)
-        res = client.post(path, data=json.dumps(entity),
-                                content_type='application/json')
+        res = client.post(path, data=json.dumps(entity))
         assert res.status_code == 201
         id_name = get_id_name_from_model(model)
         entity_id = json.loads(res.data)[id_name]
@@ -126,8 +89,7 @@ class TestCreateEntity:
         try:
             uuid.UUID(entity_id, version=4)
         except ValueError:
-            entity_id_is_valid = False
-        assert entity_id_is_valid
+            pytest.fail('entity_id is not valid UUID!')
         res = client.get('/'.join([path, entity_id]))
         assert res.status_code == 200
         res_data = json.loads(res.data)
@@ -139,15 +101,13 @@ class TestCreateEntity:
     def test_create_entity_with_hash_key_in_body(self, client, model, entity):
         entity[model().get_hash_key_name()] = str(uuid.uuid4())
         path = self.get_create_url_path(model)
-        res = client.post(path, data=json.dumps(entity),
-                                content_type='application/json')
+        res = client.post(path, data=json.dumps(entity))
         assert res.status_code == 400
 
     def test_create_datetime_ok(self, client, model, entity):
         path = self.get_create_url_path(model)
         t0  = datetime.utcnow()
-        res = client.post(path, data=json.dumps(entity),
-                                content_type='application/json')
+        res = client.post(path, data=json.dumps(entity))
         t1  = datetime.utcnow()
         assert res.status_code == 201
         data = json.loads(res.data)
@@ -261,7 +221,7 @@ class TestUpdateEntity:
         path = self.get_update_url_path(model, entity_id)
         for attr, val in new.iteritems():
             data = json.dumps({attr: val})
-            res = client.put(path, data=data, content_type='application/json')
+            res = client.put(path, data=data)
             assert res.status_code == 200
             expected[attr] = val
             updated = json.loads(res.data)
@@ -272,8 +232,7 @@ class TestUpdateEntity:
     def test_update_entity_not_found(self, client, model):
         bad_id = str(uuid.uuid4())
         path = self.get_update_url_path(model, bad_id)
-        res = client.put(path, data=json.dumps({}),
-                               content_type='application/json')
+        res = client.put(path, data=json.dumps({}))
         assert res.status_code == 404
 
     def test_update_entity_bad_attr(self, client, model, entities, entity_ids):
@@ -281,8 +240,7 @@ class TestUpdateEntity:
         bad_attr = 'mwahaha'
         entity_body[bad_attr] = 'gertcha'
         path = self.get_update_url_path(model, entity_id)
-        res = client.put(path, data=json.dumps(entity_body),
-                               content_type='application/json')
+        res = client.put(path, data=json.dumps(entity_body))
         assert res.status_code == 400
 
     def test_update_entity_bad_attr_types(self, client, model, entities,
@@ -293,8 +251,7 @@ class TestUpdateEntity:
         for attr in attrs:
             fresh_body = dict(entity)
             fresh_body[attr] = None     # test data shouldn't have any nullables
-            res = client.put(path, data=json.dumps(fresh_body),
-                                   content_type='application/json')
+            res = client.put(path, data=json.dumps(fresh_body))
             assert res.status_code == 400
 
     def test_update_entity_read_back(self):
@@ -308,12 +265,10 @@ class TestUpdateEntity:
         id_name = get_id_name_from_model(model)
         bad_body = {id_name: entity_id}
         path = self.get_update_url_path(model, entity_id)
-        res = client.put(path, data=json.dumps(bad_body),
-                               content_type='application/json')
+        res = client.put(path, data=json.dumps(bad_body))
         assert res.status_code == 400
         worse_body = {'id': entity_id}
-        res = client.put(path, data=json.dumps(worse_body),
-                               content_type='application/json')
+        res = client.put(path, data=json.dumps(worse_body))
         assert res.status_code == 400
 
     def test_update_entity_last_modified_datetime_ok(self):
