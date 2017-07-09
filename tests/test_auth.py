@@ -25,14 +25,20 @@ def test_login_ok(unauthed_client, fresh_db, dummy_entities):
     try:
         payload = jwt.decode(access_token, TOKEN_SECRET_KEY)
         uid = payload['uid']
+        gid = payload['gid']
     except:
         pytest.fail('failed decoding access_token JWT!')
     try:
         uuid.UUID(uid, version=4)
+        uuid.UUID(gid, version=4)
     except ValueError:
-        pytest.fail('access_token\'s uid claim is not valid UUID!')
+        pytest.fail('access_token\'s uid/gid claim is not valid UUID!')
+    assert payload['gid']
+    assert payload['iat']
+    assert payload['exp']
     # TODO: assert token iat claim > now
     # TODO: assert token exp claim > now
+    # TODO: assert token gid claim OK
 
 
 def test_login_bad_email(unauthed_client, fresh_db, dummy_entities):

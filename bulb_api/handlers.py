@@ -1,8 +1,11 @@
+import flask
+
 from connexion import NoContent
+from connexion.exceptions import ProblemException
 from datetime import datetime
 
 from .auth import hash_password, assert_valid_password
-from .config import HIDDEN_ATTRIBUTES
+from .config import HIDDEN_ATTRIBUTES, MASTER_KEY_UID, MASTER_KEY_GID
 from .default_tasks import DEFAULT_TASKS
 from .exceptions import BulbException
 from .models import BulbModel, Document, Organization, Resource, User, Task
@@ -126,12 +129,42 @@ def list_tasks(offset=0, limit=None):
 
 
 def create_task(body):
+    """ TODO: use pynamodb's `batch_write` mechanism here. """
     return create_entity(Task, body)
 
 
 def clean_response(body):
     return dict([(k, v) for (k, v) in body.iteritems()
                                  if k not in HIDDEN_ATTRIBUTES])
+
+
+def get_uid_gid_pair():
+    return flask.request.token_info['uid'], flask.request.token_info['gid']
+
+
+def get_org_scoped_models():
+    """ Get list of models with `org_id` attr, should have OrgIndex too. """
+    return filter(lambda m: hasattr(m, 'org_id'), BulbModel.__subclasses__())
+
+
+def check_ownership(model, entity_id):
+    uid, gid = get_uid_gid_pair()
+    if model not in get_org_scoped_models():
+        return None, None
+    elif uid == MASTER_KEY_UID and gid == MASTER_KEY_GID:
+        return uid, gid
+    entity = model.get(entity_id)
+    try:
+        detail = 'not authorized to access this resource'
+        if entity.org_id != gid:
+            raise ProblemException(status=403, title='Not Authorized',
+                                               detail=detail)
+        elif model is User and entity.user_id != uid:
+            raise ProblemException(status=403, title='Not Authorized',
+                                               detail=detail)
+    except AttributeError as e:
+        raise ProblemException(status=401, title='Unauthorized')
+    return uid, gid
 
 
 def create_entity(model, body, entity_id=None):
@@ -161,6 +194,7 @@ def create_entity(model, body, entity_id=None):
 def get_entity(model, entity_id):
     if not issubclass(model, BulbModel):
         raise BulbException('`model` must be subclass of BulbModel!')
+    check_ownership(model, entity_id)
     try:
         entity = model.get(entity_id).to_dict()
     except model.DoesNotExist:
@@ -178,13 +212,22 @@ def list_entity(model, offset, limit):
     # list. see:
     # https://stackoverflow.com/questions/39671167/index-into-a-python-iterator
     # https://github.com/pynamodb/PynamoDB/pull/48
-    entities = [entity.to_dict() for entity in model.scan()]
-    if offset > len(entities):  # TODO add test case where offset == len...
+    user_id, org_id = get_uid_gid_pair()
+    entities = None
+    if user_id == MASTER_KEY_UID and org_id == MASTER_KEY_GID:
+        entities = [entity.to_dict() for entity in model.scan()]
+    elif model is Organization:
+        entities = [entity.get(org_id).to_dict()]
+    elif model in get_org_scoped_models():
+        entities = [ent.to_dict() for ent in model.org_index.query(org_id)]
+    else:
+        entities = [entity.to_dict() for entity in model.scan()]
+    if offset > len(entities):
         return 'Offset larger than number of available entities!', 400
     try:
         offset, limit = (int(offset), None if limit is None else int(limit))
-    except ValueError:  # TODO: add CRUD test case around this.
-        return 'Offset and limit must be integers!'
+    except ValueError:
+        return 'Offset and limit must be integers!', 400
     cleaned_entities = [clean_response(d) for d in entities[offset:][:limit]]
     return cleaned_entities, 200
 
@@ -193,6 +236,7 @@ def update_entity(model, entity_id, body):
     # TODO make decorator for custom input validation?
     if not issubclass(model, BulbModel):
         raise BulbException('`model` must be subclass of BulbModel!')
+    check_ownership(model, entity_id)
     if model().get_hash_key_name() in body.keys():
         return 'Cannot specify hash_key in PUT body!', 400
     try:
@@ -213,6 +257,7 @@ def update_entity(model, entity_id, body):
 def delete_entity(model, entity_id):
     if not issubclass(model, BulbModel):
         raise BulbException('`model` must be subclass of BulbModel!')
+    check_ownership(model, entity_id)
     try:
         model.get(entity_id).delete()
     except model.DoesNotExist:

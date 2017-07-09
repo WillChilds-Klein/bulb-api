@@ -28,3 +28,6 @@ PASSWORD_SALT_LENGTH = 8                # TODO: this isn't explicitly used
 TOKEN_SIGNING_ALGORITHM = 'HS256'   # TODO: this isn't explicitly used
 TOKEN_SECRET_KEY = 'yourmom'        # should auto-regenerate this periodically
 TOKEN_LIFESPAN_SECONDS = 60*60      # 1 hr (in sec.), for now
+
+MASTER_KEY_UID = '7b8c3c62-641b-11e7-ac9d-2755eb600c1a'
+MASTER_KEY_GID = '84fb364a-641b-11e7-b474-53261a47ff0b'

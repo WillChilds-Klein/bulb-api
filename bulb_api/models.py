@@ -101,6 +101,7 @@ class Document(BulbModel):
     name = UnicodeAttribute()
     type = UnicodeAttribute(null=True)
     note = UnicodeAttribute(null=True)
+    org_index = OrgIndex()
 
 
 class Organization(BulbModel):
@@ -144,7 +145,7 @@ class User(BulbModel):
     name = UnicodeAttribute()
 
     email_index = EmailIndex()
-
+    org_index = OrgIndex()
 
 class Task(BulbModel):
     class Meta(BulbModel.Meta):

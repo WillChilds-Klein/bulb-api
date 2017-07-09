@@ -5,8 +5,8 @@ DEFAULT_TASKS = [
     {
         'org_id': None,
         'name': 'File Business Plan',
-        'priority': 0.0,
-        'status': "NOT_STARTED",
+        'priority': 0.25,
+        'status': "IN_PROGRESS",
         'workspaces': [
             "FORMATION",
             "FINANCE",
@@ -15,8 +15,8 @@ DEFAULT_TASKS = [
     {
         'org_id': None,
         'name': 'File for Tax ID',
-        'priority': 0.0,
-        'status': "NOT_STARTED",
+        'priority': 1.0,
+        'status': "COMPLETE",
         'workspaces': [
             "TAX",
             "FORMATION",
@@ -36,7 +36,7 @@ DEFAULT_TASKS = [
         'org_id': None,
         'name': 'Register as Employer',
         'priority': 0.0,
-        'status': "NOT_STARTED",
+        'status': "IN_PROGRESS",
         'workspaces': [
             "OPERATIONS",
             "EMPLOYEES",
@@ -45,7 +45,7 @@ DEFAULT_TASKS = [
     {
         'org_id': None,
         'name': 'Schedule Health Dept. Inspection',
-        'priority': 0.0,
+        'priority': 0.33,
         'status': "NOT_STARTED",
         'workspaces': [
             "COMPLIANCE",

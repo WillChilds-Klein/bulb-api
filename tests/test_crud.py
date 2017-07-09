@@ -165,6 +165,16 @@ class TestReadEntity:
 
     def test_list_entity_paginated(self, client, model):
         path = self.get_list_url_path(model)
+        q_strs = {'offset': 0}
+        res = client.get(path, query_string=q_strs)
+        assert res.status_code == 200
+        full_len = len(json.loads(res.data))
+        q_strs = {'offset': full_len}   # offset is one past end of list.
+        res = client.get(path, query_string=q_strs)
+        assert res.status_code == 200
+        res_entities = json.loads(res.data)
+        assert type(res_entities) == list
+        assert len(res_entities) == 0
         q_strs = {'offset': 0, 'limit': 1}
         res = client.get(path, query_string=q_strs)
         assert res.status_code == 200
@@ -192,6 +202,13 @@ class TestReadEntity:
 
     def test_list_entity_paginated_bad_params(self, client, model, entities):
         path = self.get_list_url_path(model)
+        q_strs = {'offset': 0}  # just to get len of entity list...
+        res = client.get(path, query_string=q_strs)
+        assert res.status_code == 200
+        full_len = len(json.loads(res.data))
+        q_strs = {'offset': full_len+1}
+        res = client.get(path, query_string=q_strs)
+        assert res.status_code == 400
         q_strs = {'limit': 65536+1}
         res = client.get(path, query_string=q_strs)
         assert res.status_code == 400
@@ -201,7 +218,10 @@ class TestReadEntity:
         q_strs = {'offset': -1}
         res = client.get(path, query_string=q_strs)
         assert res.status_code == 400
-        q_strs = {'offset': len(entities)+1}
+        q_strs = {'offset': 'foo'}
+        res = client.get(path, query_string=q_strs)
+        assert res.status_code == 400
+        q_strs = {'limit': 'foo'}
         res = client.get(path, query_string=q_strs)
         assert res.status_code == 400
 
