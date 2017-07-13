@@ -5,7 +5,7 @@ DEFAULT_TASKS = [
     {
         'org_id': None,
         'name': 'File Business Plan',
-        'priority': 0.25,
+        'priority': 1.0,
         'status': "IN_PROGRESS",
         'workspaces': [
             "FORMATION",
@@ -45,7 +45,7 @@ DEFAULT_TASKS = [
     {
         'org_id': None,
         'name': 'Schedule Health Dept. Inspection',
-        'priority': 0.33,
+        'priority': 0.5,
         'status': "NOT_STARTED",
         'workspaces': [
             "COMPLIANCE",

@@ -27,14 +27,11 @@ SPEC_DIR = APP_DIR / 'spec'
 TEST_DIR = Path(__file__).parent
 DATA_DIR = TEST_DIR / 'test_data'
 
-CONSTANTS = {
-    'TEST_DATA_DIR': DATA_DIR
-}
-
-
-@pytest.fixture(scope='module')
-def pytest_namespace():
-    return CONSTANTS
+ORG_OWNED_ENTITIES = [
+    User,
+    Task,
+    Document,
+]
 
 
 @pytest.fixture(scope='function', params=BulbModel.__subclasses__())
@@ -45,7 +42,7 @@ def model(request):
 @pytest.fixture(scope='session')
 def dummy_entities():
     def dummy_data(entity_name, minimal=True):
-        file_path = str(pytest.TEST_DATA_DIR
+        file_path = str(DATA_DIR
                         / Path('minimum_input' if minimal else 'full_input')
                         / Path(entity_name.lower() + '.json'))
         with open(file_path) as f:
@@ -65,6 +62,11 @@ def entities(model, dummy_entities):
 @pytest.fixture(scope='function')
 def entity_ids(entities):
     return [str(uuid.uuid4()) for _ in entities]
+
+
+@pytest.fixture(scope='function')
+def org_owned_entities(entities):
+    return filter(lambda e: e in ORG_OWNED_ENTITIES, entities)
 
 
 @pytest.fixture(scope='function')
@@ -97,12 +99,29 @@ def prepop_db(fresh_db, model, entities, entity_ids):
             entity_item.save()
 
 
+@pytest.fixture(scope='session')
+def user():
+    return {
+        'name': 'bob',
+        'email': 'bob@bulb.co',
+        'password': 'abcd1234',
+    }
+
+
 # TODO: move all this shit to a test config...
-@pytest.fixture(scope='module')
-def client(authenticated=True):
+@pytest.fixture(scope='session')
+def app():
     from bulb_api import start_auth_thread
     start_auth_thread(port=8081)
     os.environ['TOKENINFO_URL'] = 'http://localhost:8081/auth'
+    cxn_app = App(__name__, port=8082, specification_dir=SPEC_DIR)
+    cxn_app.add_api('swagger.yaml', validate_responses=True,
+                                    strict_validation=True)
+    cxn_app.app.testing = True
+    return cxn_app.app
+
+
+def get_client(app, access_token=None):
     class AuthenticatedTestClientWrapper(object):
         """ Inspired by this S/O post: http://bit.ly/2tnhCeY
         """
@@ -110,18 +129,37 @@ def client(authenticated=True):
             self.app = app
         def __call__(self, environ, start_response):
             environ['CONTENT_TYPE'] = 'application/json'
-            if authenticated:
-                environ['HTTP_AUTHORIZATION'] = 'Bearer master_key'
+            if access_token:
+                environ['HTTP_AUTHORIZATION'] = 'Bearer {}'.format(access_token)
             return self.app(environ, start_response)
-    cxn_app = App(__name__, port=8082, specification_dir=SPEC_DIR)
-    cxn_app.add_api('swagger.yaml', validate_responses=True)
-                                    # strict_validation=True)
-    cxn_app.app.wsgi_app = AuthenticatedTestClientWrapper(cxn_app.app.wsgi_app)
-    cxn_app.app.testing = True
-    with cxn_app.app.test_client(use_cookies=False) as client:
+    app.wsgi_app = AuthenticatedTestClientWrapper(app.wsgi_app)
+    with app.test_client(use_cookies=False) as client:
         yield client
 
 
 @pytest.fixture(scope='module')
-def unauthed_client():
-    return next(client(authenticated=False))
+def client(app):
+    return next(get_client(app, access_token='master_key'))
+
+
+@pytest.fixture(scope='module')
+def unauthed_client(app):
+    return next(get_client(app))
+
+
+@pytest.fixture(scope='function')
+def authorized_client(app, unauthed_client, user):
+    # TODO: make unauth'd client the default, update where needed...
+    res = unauthed_client.post('/user', data=json.dumps(user))
+    assert res.status == 201
+    auth_data = {'email': user['email'], 'password': user['password']}
+    res = unauthed_client.post('/auth', data=json.dumps(auth_data))
+    access_token = res.data['access_token']
+    return next(get_client(app, access_token=access_token))
+
+
+@pytest.fixture(scope='function')
+def authorized_entities(authorized_client, fresh_db, org_owned_entities):
+    # TODO: this fixture should populate the db with org_owned_entities
+    #       instances owned by authorized_client's user and its org_id.
+    pass

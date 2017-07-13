@@ -286,10 +286,14 @@ class TestUpdateEntity:
         bad_body = {id_name: entity_id}
         path = self.get_update_url_path(model, entity_id)
         res = client.put(path, data=json.dumps(bad_body))
-        assert res.status_code == 400
-        worse_body = {'id': entity_id}
+        assert res.status_code == 200   # we should allow this, just del ID
+        worse_body = {'id': entity_id}  # should fail b/c 'id' isn't valid key
         res = client.put(path, data=json.dumps(worse_body))
         assert res.status_code == 400
+        mismatch_uuid = str(uuid.uuid4())
+        worst_body = {id_name: mismatch_uuid}
+        res = client.put(path, data=json.dumps(worst_body))
+        assert res.status_code == 400   # can't allow mismatches in IDs passed
 
     def test_update_entity_last_modified_datetime_ok(self):
         # TODO: implement this behavior in handlers.py! also, assert that it's

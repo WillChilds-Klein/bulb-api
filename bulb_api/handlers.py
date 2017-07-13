@@ -153,7 +153,10 @@ def check_ownership(model, entity_id):
         return None, None
     elif uid == MASTER_KEY_UID and gid == MASTER_KEY_GID:
         return uid, gid
-    entity = model.get(entity_id)
+    try:
+        entity = model.get(entity_id)
+    except model.DoesNotExist:
+        return NoContent, 404
     try:
         detail = 'not authorized to access this resource'
         if entity.org_id != gid:
@@ -234,11 +237,18 @@ def list_entity(model, offset, limit):
 
 def update_entity(model, entity_id, body):
     # TODO make decorator for custom input validation?
+    # TODO: [URGENT] need to strip out un-touchables (create_datetime, *_id,
+    # etc.)
     if not issubclass(model, BulbModel):
         raise BulbException('`model` must be subclass of BulbModel!')
     check_ownership(model, entity_id)
-    if model().get_hash_key_name() in body.keys():
-        return 'Cannot specify hash_key in PUT body!', 400
+    entity_id_key = model().get_hash_key_name()
+    if entity_id_key in body.keys():
+        if body[entity_id_key] != entity_id:
+            msg = '{model_name} ID specified in body differs from ID in path.'
+            return msg.format(model_name=model.__name__), 400
+        else:
+            del body[model().get_hash_key_name()]
     try:
         entity = model.get(entity_id)
     except model.DoesNotExist:
