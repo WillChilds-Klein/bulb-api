@@ -412,6 +412,22 @@ paths:
       security:
         - oauth2:
             - uid
+  '/users/{user_id}/init':
+    parameters:
+      - name: user_id
+        in: path
+        required: true
+        type: string
+    post:
+      operationId: bulb_api.handlers.init_user
+      summary: Initialize User
+      tags:
+        - Users
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/user-output'
   '/users/{user_id}':
     parameters:
       - name: user_id
@@ -772,6 +788,9 @@ definitions:
       s3_thumbnail_uri:
         type: string
         format: uri
+      org_id:
+        type: string
+        format: uuid
     example:
       res_id: d8603e76-5d49-48e3-b6c4-35e61622675a
       create_datetime: '2016-08-07T12:52:08Z'
@@ -779,6 +798,7 @@ definitions:
       url: 'https://www.mdchamber.org/'
       s3_thumbnail_uri: 'https://bulb-resources.s3.amazonaws.com/MD_Chamber_of_Commerce.png'
       mailto_uri: 'mailto:jpalmeri@mdchamber.org'
+      org_id: 2ff16c3c-64f5-4ed2-8473-6ad789b1162b
   resource-readonly:
     title: Resource ReadOnly
     type: object
@@ -805,11 +825,15 @@ definitions:
       s3_thumbnail_uri:
         type: string
         format: uri
+      org_id:
+        type: string
+        format: uuid
     required:
       - res_id
       - create_datetime
       - name
       - url
+      - org_id
     example:
       res_id: d8603e76-5d49-48e3-b6c4-35e61622675a
       create_datetime: '2016-08-07T12:52:08Z'
@@ -817,6 +841,7 @@ definitions:
       url: 'https://www.mdchamber.org/'
       s3_thumbnail_uri: 'https://bulb-resources.s3.amazonaws.com/MD_Chamber_of_Commerce.png'
       mailto_uri: 'mailto:jpalmeri@mdchamber.org'
+      org_id: 2ff16c3c-64f5-4ed2-8473-6ad789b1162b
   task:
     title: Task
     type: object
@@ -1013,7 +1038,6 @@ definitions:
       - user_id
       - create_datetime
       - email
-      - org_id
       - name
     example:
       user_id: 4c1fb4fe-b4f0-4b90-bb1d-e36c8cac9ef0

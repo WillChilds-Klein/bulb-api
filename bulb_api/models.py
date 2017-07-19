@@ -9,34 +9,16 @@ from pynamodb.attributes import (
         UTCDateTimeAttribute
 )
 from pynamodb.exceptions import GetError
-from pynamodb.indexes import GlobalSecondaryIndex, AllProjection
 from pynamodb.models import Model
 
 from .exceptions import BulbException
-
-
-class EmailIndex(GlobalSecondaryIndex):
-    """ TODO
-    """
-    class Meta():
-        index_name = 'email-index'
-        read_capacity_units = 1
-        write_capacity_units = 1
-        projection = AllProjection()
-
-    email = UnicodeAttribute(hash_key=True)
-
-
-class OrgIndex(GlobalSecondaryIndex):
-    """ TODO
-    """
-    class Meta():
-        index_name = 'org-index'
-        read_capacity_units = 1
-        write_capacity_units = 1
-        projection = AllProjection()
-
-    org_id = UnicodeAttribute(hash_key=True)
+from .indexes import (
+    EmailIndexForUser,
+    OrgIndexForDocument,
+    OrgIndexForResource,
+    OrgIndexForTask,
+    OrgIndexForUser,
+)
 
 
 class BulbModel(Model):
@@ -83,8 +65,8 @@ class BulbModel(Model):
             elif key not in self.attribute_values.keys() \
                     and key not in self._attributes.keys():
                 raise BulbException('key `{}` must be valid attr'.format(key))
-            else:
-                setattr(self, key, value)
+            elif key is not None and value is not None:     # TODO: write a
+                setattr(self, key, value)                   # test around this.
 
 
 class Document(BulbModel):
@@ -92,8 +74,8 @@ class Document(BulbModel):
         table_name = 'Document'
 
     doc_id = UnicodeAttribute(hash_key=True)
-    create_datetime = UTCDateTimeAttribute()
     org_id = UnicodeAttribute()
+    create_datetime = UTCDateTimeAttribute()
     uri = UnicodeAttribute()
     due_date = UTCDateTimeAttribute(null=True)
     progress = NumberAttribute(null=True)
@@ -101,7 +83,8 @@ class Document(BulbModel):
     name = UnicodeAttribute()
     type = UnicodeAttribute(null=True)
     note = UnicodeAttribute(null=True)
-    org_index = OrgIndex()
+
+    org_index = OrgIndexForDocument()
 
 
 class Organization(BulbModel):
@@ -110,8 +93,8 @@ class Organization(BulbModel):
 
     org_id = UnicodeAttribute(hash_key=True)
     create_datetime = UTCDateTimeAttribute()
-    type = UnicodeAttribute()
-    name = UnicodeAttribute()
+    type = UnicodeAttribute(null=True)
+    name = UnicodeAttribute(null=True)  # TODO: require this, make input field
     users = ListAttribute()
 
 
@@ -120,11 +103,14 @@ class Resource(BulbModel):
         table_name = 'Resource'
 
     res_id = UnicodeAttribute(hash_key=True)
+    org_id = UnicodeAttribute()
     create_datetime = UTCDateTimeAttribute()
     name = UnicodeAttribute()
     url = UnicodeAttribute()
     mailto_uri = UnicodeAttribute(null=True)
     s3_thumbnail_uri = UnicodeAttribute(null=True)
+
+    org_index = OrgIndexForResource()
 
 
 class User(BulbModel):
@@ -138,14 +124,15 @@ class User(BulbModel):
         table_name = 'User'
 
     user_id = UnicodeAttribute(hash_key=True)
+    org_id = UnicodeAttribute(null=True)    # strictly for user creation.
     email = UnicodeAttribute()
     password_hash = UnicodeAttribute()
     create_datetime = UTCDateTimeAttribute()
-    org_id = UnicodeAttribute()     # TODO: change this to "org_id"
     name = UnicodeAttribute()
 
-    email_index = EmailIndex()
-    org_index = OrgIndex()
+    email_index = EmailIndexForUser()
+    org_index = OrgIndexForUser()
+
 
 class Task(BulbModel):
     class Meta(BulbModel.Meta):
@@ -160,4 +147,4 @@ class Task(BulbModel):
     priority = NumberAttribute()
     status = UnicodeAttribute()
 
-    org_index = OrgIndex()
+    org_index = OrgIndexForTask()

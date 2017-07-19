@@ -74,7 +74,7 @@ def validate_token(access_token):
     if not re.match('^(localhost|127\.0\.0\.1)$', req_hostname):
         return NoContent, 404
     try:
-        payload = jwt.decode(access_token, TOKEN_SECRET_KEY)
+        payload = jwt.decode(access_token, key=TOKEN_SECRET_KEY)
         uid = payload['uid']
         gid = payload['gid']
     except jwt.ExpiredSignatureError:

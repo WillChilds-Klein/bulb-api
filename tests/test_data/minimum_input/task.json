@@ -1,7 +1,6 @@
 [
     {
         "name": "create business plan",
-        "org_id": "c51d7bd8-61ce-11e7-9210-ebdb9a35a3dc",
         "priority": 0,
         "status": "NOT_STARTED",
         "workspaces": [
@@ -10,7 +9,6 @@
     },
     {
         "name": "file taxes",
-        "org_id": "c51d7bd8-61ce-11e7-9210-ebdb9a35a3dc",
         "priority": 0.82,
         "status": "NOT_STARTED",
         "workspaces": [

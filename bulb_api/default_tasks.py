@@ -3,7 +3,6 @@
 
 DEFAULT_TASKS = [
     {
-        'org_id': None,
         'name': 'File Business Plan',
         'priority': 1.0,
         'status': "IN_PROGRESS",
@@ -13,7 +12,6 @@ DEFAULT_TASKS = [
         ]
     },
     {
-        'org_id': None,
         'name': 'File for Tax ID',
         'priority': 1.0,
         'status': "COMPLETE",
@@ -23,7 +21,6 @@ DEFAULT_TASKS = [
         ]
     },
     {
-        'org_id': None,
         'name': 'Contract Electrician',
         'priority': 0.0,
         'status': "NOT_STARTED",
@@ -33,7 +30,6 @@ DEFAULT_TASKS = [
         ]
     },
     {
-        'org_id': None,
         'name': 'Register as Employer',
         'priority': 0.0,
         'status': "IN_PROGRESS",
@@ -43,7 +39,6 @@ DEFAULT_TASKS = [
         ]
     },
     {
-        'org_id': None,
         'name': 'Schedule Health Dept. Inspection',
         'priority': 0.5,
         'status': "NOT_STARTED",

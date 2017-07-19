@@ -11,14 +11,13 @@ from bulb_api.config import TOKEN_SECRET_KEY
 # TODO: move to either a.) prepop_db or b.) other consolidated fixture
 
 
-def test_login_ok(unauthed_client, fresh_db, dummy_entities):
+# TODO URGENT NEED TO CALL '/users/${user_id}/init'
+
+def test_login_ok(unauthed_client, fresh_db, user):
     client = unauthed_client
-    fresh_user = dummy_entities[User][0]
-    res = client.post('/users', data=json.dumps(fresh_user))
-    assert res.status_code == 201
     res = client.post('/auth', data=json.dumps({
-        'email': fresh_user['email'],
-        'password': fresh_user['password'],
+        'email': user['email'],
+        'password': user['password'],
     }))
     assert res.status_code == 200
     access_token = json.loads(res.data)['access_token']
@@ -33,62 +32,54 @@ def test_login_ok(unauthed_client, fresh_db, dummy_entities):
         uuid.UUID(gid, version=4)
     except ValueError:
         pytest.fail('access_token\'s uid/gid claim is not valid UUID!')
-    assert payload['gid']
-    assert payload['iat']
-    assert payload['exp']
+    assert payload['gid'] is not None
+    assert payload['iat'] is not None
+    assert payload['exp'] is not None
     # TODO: assert token iat claim > now
     # TODO: assert token exp claim > now
     # TODO: assert token gid claim OK
 
 
-def test_login_bad_email(unauthed_client, fresh_db, dummy_entities):
+def test_login_bad_email(unauthed_client, fresh_db, user):
     client = unauthed_client
-    fresh_user = dummy_entities[User][0]
     res = client.post('/auth', data=json.dumps({
         'email': 'clearly_not_an_email',
-        'password': fresh_user['password'],
+        'password': user['password'],
     }))
     assert res.status_code == 400
     res = client.post('/auth', data=json.dumps({
-        'password': fresh_user['password'],
+        'password': user['password'],
     }))
     assert res.status_code == 400
 
 
-def test_login_nonexistent_email(unauthed_client, fresh_db, dummy_entities):
+def test_login_nonexistent_email(unauthed_client, fresh_db):
     client = unauthed_client
-    fresh_user = dummy_entities[User][0]
     res = client.post('/auth', data=json.dumps({
-        'email': fresh_user['email'],
-        'password': fresh_user['password'],
+        'email': 'this_email_neva_been_seen@befo.re',
+        'password': 'irrelevantpassword',
     }))
     assert res.status_code == 404
 
 
-def test_login_bad_password(unauthed_client, fresh_db, dummy_entities):
+def test_login_bad_password(unauthed_client, fresh_db, user):
     client = unauthed_client
-    fresh_user = dummy_entities[User][0]
-    res = client.post('/users', data=json.dumps(fresh_user))
-    assert res.status_code == 201
     res = client.post('/auth', data=json.dumps({
-        'email': fresh_user['email'],
-        'password': 'not_a_valid_password',
+        'email': user['email'],
+        'password': 'not_the_user_password',
     }))
     assert res.status_code == 401
     res = client.post('/auth', data=json.dumps({
-        'email': fresh_user['email'],
+        'email': user['email'],
     }))
     assert res.status_code == 400
 
 
-def test_auth_ok(unauthed_client, fresh_db, dummy_entities):
+def test_auth_ok(unauthed_client, fresh_db, user):
     client = unauthed_client
-    fresh_user = dummy_entities[User][0]
-    res = client.post('/users', data=json.dumps(fresh_user))
-    assert res.status_code == 201
     res = client.post('/auth', data=json.dumps({
-        'email': fresh_user['email'],
-        'password': fresh_user['password'],
+        'email': user['email'],
+        'password': user['password'],
     }))
     assert res.status_code == 200
     access_token = json.loads(res.data)['access_token']
@@ -114,14 +105,11 @@ def test_hidden_auth_get(unauthed_client):
     assert res.status_code == 400
 
 
-def test_auth_expired_token(unauthed_client, fresh_db, dummy_entities):
+def test_auth_expired_token(unauthed_client, fresh_db, user):
     client = unauthed_client
-    fresh_user = dummy_entities[User][0]
-    res = client.post('/users', data=json.dumps(fresh_user))
-    assert res.status_code == 201
     res = client.post('/auth', data=json.dumps({
-        'email': fresh_user['email'],
-        'password': fresh_user['password'],
+        'email': user['email'],
+        'password': user['password'],
     }))
     assert res.status_code == 200
     access_token = json.loads(res.data)['access_token']
@@ -133,14 +121,11 @@ def test_auth_expired_token(unauthed_client, fresh_db, dummy_entities):
     assert res.status_code == 401
 
 
-def test_auth_bad_token_signature(unauthed_client, fresh_db, dummy_entities):
+def test_auth_bad_token_signature(unauthed_client, fresh_db, user):
     client = unauthed_client
-    fresh_user = dummy_entities[User][0]
-    res = client.post('/users', data=json.dumps(fresh_user))
-    assert res.status_code == 201
     res = client.post('/auth', data=json.dumps({
-        'email': fresh_user['email'],
-        'password': fresh_user['password'],
+        'email': user['email'],
+        'password': user['password'],
     }))
     assert res.status_code == 200
     access_token = json.loads(res.data)['access_token']
@@ -152,14 +137,11 @@ def test_auth_bad_token_signature(unauthed_client, fresh_db, dummy_entities):
     assert res.status_code == 401
 
 
-def test_auth_bad_token_no_uid(unauthed_client, fresh_db, dummy_entities):
+def test_auth_bad_token_no_uid(unauthed_client, fresh_db, user):
     client = unauthed_client
-    fresh_user = dummy_entities[User][0]
-    res = client.post('/users', data=json.dumps(fresh_user))
-    assert res.status_code == 201
     res = client.post('/auth', data=json.dumps({
-        'email': fresh_user['email'],
-        'password': fresh_user['password'],
+        'email': user['email'],
+        'password': user['password'],
     }))
     assert res.status_code == 200
     access_token = json.loads(res.data)['access_token']
